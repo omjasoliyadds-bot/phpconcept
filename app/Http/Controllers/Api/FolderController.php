@@ -15,7 +15,8 @@ class FolderController extends Controller
         // dd($request->all());
         // exit;
         $validator = Validator::make($request->all(), [
-            "name" => "required",
+            "name" => "required|string|max:255",
+            "parent_id" => "nullable|exists:folders,id",
         ]);
 
         if ($validator->fails()) {
@@ -25,10 +26,40 @@ class FolderController extends Controller
             ]);
         }
 
+        $userId = auth()->id();
+        $parentId = $request->parent_id;
+
+        // Additional check for parent_id ownership if provided
+        if ($parentId) {
+            $parentFolder = Folder::where('id', $parentId)
+                ->where('user_id', $userId)
+                ->first();
+            
+            if (!$parentFolder) {
+                return response()->json([
+                    "status" => false,
+                    "errors" => ["parent_id" => ["The selected parent folder is invalid or does not belong to you."]],
+                ]);
+            }
+        }
+
+        // Check for duplicate folder name in the same parent
+        $duplicate = Folder::where('user_id', $userId)
+            ->where('name', $request->name)
+            ->where('parent_id', $parentId)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                "status" => false,
+                "errors" => ["name" => ["A folder with this name already exists in this location."]],
+            ]);
+        }
+
         $folder = Folder::create([
             "name" => $request->name,
-            "user_id" => auth()->user()->id,
-            "parent_id" => $request->parent_id
+            "user_id" => $userId,
+            "parent_id" => $parentId
         ]);
 
         return response()->json([
@@ -50,12 +81,14 @@ class FolderController extends Controller
 
     public function removeFolder($id)
     {
-        $folder = Folder::find($id);
+        $folder = Folder::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
 
         if (!$folder) {
             return response()->json([
                 "status" => false,
-                "message" => "Folder not found"
+                "message" => "Folder not found or you don't have permission to delete it"
             ]);
         }
 
@@ -86,7 +119,7 @@ class FolderController extends Controller
     public function updateFolderName(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required'
+            'name' => 'required|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -96,8 +129,9 @@ class FolderController extends Controller
             ]);
         }
 
+        $userId = auth()->id();
         $folder = Folder::where('id', $id)
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->first();
 
         if (!$folder) {
@@ -105,6 +139,20 @@ class FolderController extends Controller
                 "status" => false,
                 "message" => "Folder not found",
             ], 404);
+        }
+
+        // Check for duplicate folder name (excluding current folder)
+        $duplicate = Folder::where('user_id', $userId)
+            ->where('name', $request->name)
+            ->where('parent_id', $folder->parent_id)
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                "status" => false,
+                "errors" => ["name" => ["A folder with this name already exists in this location."]],
+            ]);
         }
 
         $folder->name = $request->name;

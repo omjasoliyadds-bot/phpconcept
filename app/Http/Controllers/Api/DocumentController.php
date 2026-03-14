@@ -25,8 +25,39 @@ class DocumentController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
 
+        // Additional check for folder_id ownership if provided
+        $userId = auth()->id();
+        $folderId = $request->folder_id;
+
+        if ($folderId) {
+            $folder = \App\Models\Folder::where('id', $folderId)
+                ->where('user_id', $userId)
+                ->first();
+            
+            if (!$folder) {
+                return response()->json([
+                    'status' => false,
+                    'errors' => ['folder_id' => ['The selected folder is invalid or does not belong to you.']],
+                ]);
+            }
+        }
+
         $file = $request->file('document');
         $originalName = $file->getClientOriginalName();
+
+        // Check for duplicate file name in the same folder
+        $duplicate = Document::where('user_id', $userId)
+            ->where('name', $originalName)
+            ->where('folder_id', $folderId)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                'status' => false,
+                'errors' => ['document' => ['A file with this name already exists in this location.']],
+            ]);
+        }
+
         $extension = $file->getClientOriginalExtension();
         
         // Store in 'local' storage (private by default)
@@ -64,12 +95,27 @@ class DocumentController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
 
-        $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $userId = auth()->id();
+        $document = Document::where('id', $id)->where('user_id', $userId)->firstOrFail();
         
         // Ensure extension stays the same
         $newName = $request->name;
         if (!Str::endsWith($newName, '.' . $document->extension)) {
             $newName .= '.' . $document->extension;
+        }
+
+        // Check for duplicate file name (excluding current document) in the same folder
+        $duplicate = Document::where('user_id', $userId)
+            ->where('name', $newName)
+            ->where('folder_id', $document->folder_id)
+            ->where('id', '!=', $id)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                'status' => false,
+                'errors' => ['name' => ['A file with this name already exists in this location.']],
+            ]);
         }
 
         $document->name = $newName;
