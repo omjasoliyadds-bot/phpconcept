@@ -72,6 +72,10 @@
                         </form>
                     </div>
 
+                    <div class="mb-3 text-center">
+                        <a href="{{ route('auth.reset-password') }}">Forgot Password?</a>
+                    </div>
+
                     <div class="card-footer text-center">
                         Create an account?
                         <a href="/">Register Here</a>

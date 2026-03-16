@@ -159,7 +159,7 @@
                                                         data-name="${file.name.split('.').slice(0, -1).join('.')}">
                                                     <i class="fa fa-edit"></i>
                                                 </button>
-                                                <a href="/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
+                                                <a href="{{ route('documents.download', ':id') }}".replace(':id', file.id) class="btn btn-sm btn-outline-success">
                                                     <i class="fa fa-download me-1"></i> Download
                                             </a>
                                         </td>
@@ -189,7 +189,7 @@
             let formData = $(this).serialize();
 
             $.ajax({
-                url: "/api/v1/folders/" + id,
+                url: "{{ route('folders.update', ':id') }}".replace(':id', id),
                 method: "PUT",
                 data: formData,
                 success: function (response) {
@@ -229,7 +229,7 @@
             let formData = $(this).serialize();
 
             $.ajax({
-                url: "/api/v1/documents/" + id,
+                url: "{{ route('api.documents.update', ':id') }}".replace(':id', id),
                 method: "PUT",
                 data: formData,
                 success: function (response) {

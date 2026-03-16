@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\DocumentController as ApiDocumentController;
+use App\Http\Controllers\Auth\AuthController;
 
 // Public Routes (Only for guests)
 Route::middleware(['guest'])->group(function () {
@@ -12,6 +13,8 @@ Route::middleware(['guest'])->group(function () {
         });
         Route::get('login', 'loginView')->name('login');
     });
+    Route::get('forgot-password',[AuthController::class,'showLinkRequestForm'])->name('auth.reset-password');
+    Route::get('reset-password/{token}',[AuthController::class,'showResetPasswordForm'])->name('password.reset');
 });
 
 // Protected Routes

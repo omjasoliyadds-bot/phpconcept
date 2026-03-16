@@ -1,7 +1,7 @@
 <div class="header d-flex justify-content-between align-items-center">
 
     <!-- Mobile Sidebar Button -->
-    <button class="btn btn-light d-md-none header-icon-btn" onclick="toggleSidebar()">
+    <button class="btn btn-light d-lg-none sidebar-toggle-btn header-icon-btn" onclick="toggleSidebar()">
         <i class="fa fa-bars"></i>
     </button>
 

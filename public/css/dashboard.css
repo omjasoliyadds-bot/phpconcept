@@ -1,6 +1,6 @@
 body {
     background: #f9fafb;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     color: #111827;
     min-height: 100vh;
 }
@@ -91,7 +91,6 @@ body {
     color: #ffffff;
 }
 
-
 .sidebar-storage {
     padding: 20px;
     margin: 16px;
@@ -175,7 +174,6 @@ body {
     color: #4f46e5;
 }
 
-
 .notification-badge {
     position: absolute;
     top: 8px;
@@ -246,7 +244,6 @@ body {
 }
 
 @media (max-width: 991px) {
-
     .sidebar {
         transform: translateX(-100%);
     }

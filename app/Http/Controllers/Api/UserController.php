@@ -41,7 +41,7 @@ class UserController extends Controller
             "verification_token" => $token
         ]);
 
-        $link = url('/api/v1/activate-account/' . $token);
+        $link = route('activate.account', $token);
 
         Mail::to($user->email)->send(new VerifyUserEmail($link));
 

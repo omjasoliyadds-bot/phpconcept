@@ -195,7 +195,7 @@
                         let totalSize = folder.total_size ? (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
                         html += `
                             <tr>
-                                <td onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
+                                <td onclick="window.location.href='{{ route('folders.show', ':id') }}'.replace(':id', folder.id)" style="cursor:pointer;">
                                     <div class="d-flex align-items-center">
                                         <div class="me-3" style="width:35px;height:35px;background:#fff8e1;border-radius:10px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fa fa-folder text-warning"></i>
@@ -241,7 +241,7 @@
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
-                                    <a href="/documents/${file.id}/download" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('documents.download', ':id') }}".replace(':id', file.id) class="btn btn-sm btn-outline-primary">
                                         <i class="fa fa-download"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
@@ -302,7 +302,7 @@
                 e.preventDefault();
                 let id = $('#folder_id').val();
                 $.ajax({
-                    url: "/api/v1/folders/" + id,
+                    url: "{{ route('folders.update', ':id') }}".replace(':id', id),
                     method: "PUT",
                     data: $(this).serialize(),
                     success: function (response) {
@@ -328,7 +328,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "/api/v1/folders/" + id,
+                            url: "{{ route('folders.remove', ':id') }}".replace(':id', id),
                             type: "DELETE",
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
@@ -373,7 +373,7 @@
                 e.preventDefault();
                 let id = $('#doc_id').val();
                 $.ajax({
-                    url: "/api/v1/documents/" + id,
+                    url: "{{ route('api.documents.update', ':id') }}".replace(':id', id),
                     method: "PUT",
                     data: $(this).serialize(),
                     success: function (response) {
@@ -399,7 +399,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "/api/v1/documents/" + id,
+                            url: "{{ route('api.documents.destroy', ':id') }}".replace(':id', id),
                             type: "DELETE",
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
