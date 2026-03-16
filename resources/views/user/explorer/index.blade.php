@@ -176,6 +176,16 @@
                     success: function (response) {
                         if (response.status) {
                             renderTable(response.folders, response.files);
+                        }
+                    }
+                });
+
+                // Fetch all folders for dropdown
+                $.ajax({
+                    url: "{{ route('folders.all') }}",
+                    method: "GET",
+                    success: function (response) {
+                        if (response.status) {
                             updateFolderDropdown(response.folders);
                         }
                     }
@@ -241,7 +251,7 @@
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
-                                    <a href="{{ route('documents.download', ':id') }}".replace(':id', file.id) class="btn btn-sm btn-outline-primary">
+                                    <a href="/documents/${file.id}/download" class="btn btn-sm btn-outline-primary">
                                         <i class="fa fa-download"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">

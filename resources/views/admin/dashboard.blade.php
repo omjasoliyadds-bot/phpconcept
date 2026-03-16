@@ -65,23 +65,6 @@
         </div>
     </div>
 
-    <!-- Stat Card 4 -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                        <i class="fas fa-chart-line text-success fs-4"></i>
-                    </div>
-                    <div>
-                        <span class="badge bg-success bg-opacity-10 text-success fw-bold">+18%</span>
-                    </div>
-                </div>
-                <h6 class="text-muted mb-1 fw-medium text-uppercase small">Active Sessions</h6>
-                <h2 class="fw-bold mb-0">142</h2>
-            </div>
-        </div>
-    </div>
 </div>
 
 @endsection

@@ -27,6 +27,7 @@ Route::middleware(['auth', 'activated'])->group(function () {
     // Admin Routes
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashboard');
+        Route::post('logout', [App\Http\Controllers\Admin\AdminController::class, 'logout'])->name('admin.logout');
     });
 
     Route::prefix('documents')->group(function () {

@@ -13,18 +13,6 @@
 
     <!-- Right Section -->
     <div class="d-flex align-items-center gap-3">
-
-        <!-- Notification -->
-        <div class="header-icon-btn d-none d-sm-flex">
-            <i class="fa fa-bell"></i>
-            <span class="notification-badge"></span>
-        </div>
-
-        <!-- Plus Action -->
-        <div class="header-icon-btn d-none d-sm-flex">
-            <i class="fa fa-plus"></i>
-        </div>
-
         <!-- Profile Dropdown -->
         <div class="dropdown">
             <a href="#" class="d-flex align-items-center text-dark text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">

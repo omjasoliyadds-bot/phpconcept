@@ -19,8 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'user' => \App\Http\Middleware\UserMiddleware::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('login'));
-        $middleware->redirectUsersTo(fn () => auth()->user()->isUser() ? route('user.dashboard') : route('login'));    })
+        $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('user.dashboard'));
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

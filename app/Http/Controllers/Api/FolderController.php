@@ -71,11 +71,13 @@ class FolderController extends Controller
 
     public function getAllFolders(Request $request)
     {
-        $user_id = auth()->user()->id;
-        $folders = Folder::where('user_id', auth()->user()->id)->get();
+        $user_id = auth()->id();
+        $folders = Folder::where('user_id', $user_id)->with('subfolders')->get();
+        $outsideFiles = Document::where('user_id', $user_id)->whereNull('folder_id')->get();
         return response()->json([
             "status" => true,
             "folders" => $folders,
+            "outsideFiles" => $outsideFiles
         ]);
     }
 
@@ -105,12 +107,14 @@ class FolderController extends Controller
 
         $folder = Folder::where('id', $id)
             ->where('user_id', $userId)
-            ->with('files')
+            ->with(['files', 'subfolders'])
             ->firstOrFail();
         $totalSize = $folder->files->sum('size');
 
         return response()->json([
             "status" => true,
+            "folder" => $folder,
+            "subfolders" => $folder->subfolders,
             "files" => $folder->files,
             "totalSize"=> $totalSize
         ]);
@@ -168,15 +172,19 @@ class FolderController extends Controller
     public function getExplorerData()
     {
         $user_id = auth()->id();
-        $folders = Folder::where('user_id', $user_id)->get();
+        // Return root folders and root files
+        $folders = Folder::where('user_id', $user_id)->whereNull('parent_id')->get();
         $files = Document::where('user_id', $user_id)
             ->whereNull('folder_id')
             ->get();
 
+        // Also return all folders for sidebar/navigation if needed
+        $allFolders = Folder::where('user_id', $user_id)->get();
         return response()->json([
             "status" => true,
             "folders" => $folders,
-            "files" => $files
+            "files" => $files,
+            "allFolders" => $allFolders
         ]);
     }
 }
