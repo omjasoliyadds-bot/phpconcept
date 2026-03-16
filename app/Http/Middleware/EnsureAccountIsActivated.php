@@ -6,6 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Illuminate\Support\Facades\Auth;
+
 class EnsureAccountIsActivated
 {
     /**
@@ -23,6 +25,7 @@ class EnsureAccountIsActivated
                 ], 403);
             }
 
+            Auth::logout();
             return redirect()->route('login')->with('error', 'Please activate your account first.');
         }
 
