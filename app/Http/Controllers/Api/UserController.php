@@ -86,10 +86,13 @@ class UserController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $redirectUrl = $user->isAdmin() ? route('admin.dashboard') : route('user.dashboard');
+
         return response()->json([
             "status" => true,
             "message" => "Login successful",
             "token" => $token,
+            "redirect_url" => $redirectUrl,
             "data" => $user
         ]);
     }

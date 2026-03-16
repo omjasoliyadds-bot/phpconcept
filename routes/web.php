@@ -24,6 +24,11 @@ Route::middleware(['auth', 'activated'])->group(function () {
         Route::get('profile', 'userProfile')->name('user.profile');
     });
 
+    // Admin Routes
+    Route::middleware(['admin'])->prefix('admin')->group(function () {
+        Route::get('dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashboard');
+    });
+
     Route::prefix('documents')->group(function () {
         Route::post('upload', [ApiDocumentController::class, 'store'])->name('documents.upload');
         Route::put('{id}', [ApiDocumentController::class, 'update'])->name('documents.update');

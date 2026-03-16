@@ -138,7 +138,7 @@
                                     timer: 1500
                                 }).then(() => {
                                     $('#userLogin')[0].reset();
-                                    window.location.href = "{{ route('user.dashboard') }}";
+                                    window.location.href = response.redirect_url;
                                 });
                             } else {
                                 Swal.fire({

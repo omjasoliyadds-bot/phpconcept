@@ -16,9 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToGroup('api', \App\Http\Middleware\ForceJsonResponse::class);
         $middleware->alias([
             'activated' => \App\Http\Middleware\EnsureAccountIsActivated::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => route('user.dashboard'));
+        $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('user.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
