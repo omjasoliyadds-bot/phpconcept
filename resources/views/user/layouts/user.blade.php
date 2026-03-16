@@ -20,19 +20,19 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     {{-- Sidebar --}}
-    @include('partials.user.sidebar')
+    @include('user.partials.sidebar')
 
     <div class="main-wrapper">
 
         {{-- Header --}}
-        @include('partials.user.header')
+        @include('user.partials.header')
 
         <div class="content-area">
             @yield('content')
         </div>
 
         {{-- Footer --}}
-        @include('partials.user.footer')
+        @include('user.partials.footer')
 
     </div>
 

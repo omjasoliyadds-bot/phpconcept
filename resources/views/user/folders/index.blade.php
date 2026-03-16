@@ -1,4 +1,4 @@
-@extends('layouts.user.user')
+@extends('user.layouts.user')
 
 @section('content')
     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#folderModal">

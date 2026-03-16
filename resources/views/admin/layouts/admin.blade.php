@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard') | {{ config('app.name') }}</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --sidebar-width: 260px;
@@ -118,7 +119,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -150,9 +151,11 @@
             #sidebar {
                 left: calc(-1 * var(--sidebar-width));
             }
+
             #sidebar.active {
                 left: 0;
             }
+
             #main-content {
                 margin-left: 0;
             }
@@ -160,6 +163,7 @@
     </style>
     @yield('styles')
 </head>
+
 <body>
 
     <!-- Sidebar -->
@@ -183,15 +187,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <script>
         // Toggle Sidebar for Mobile
-        $(document).ready(function() {
-            $('#sidebarCollapse').on('click', function() {
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
             });
         });
     </script>
     @yield('scripts')
 </body>
+
 </html>
