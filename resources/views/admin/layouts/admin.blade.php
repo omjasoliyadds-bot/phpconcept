@@ -14,55 +14,43 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --sidebar-width: 260px;
-            --header-height: 70px;
-            --primary-color: #4361ee;
-            --secondary-color: #805dca;
-            --bg-color: #f8f9fa;
-            --sidebar-bg: #ffffff;
-            --sidebar-color: #3b3f5c;
-            --sidebar-active-bg: rgba(67, 97, 238, 0.08);
-            --sidebar-active-color: #4361ee;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background: #f8f9fa;
             overflow-x: hidden;
         }
 
-        /* Sidebar Styling */
+        /* ================= SIDEBAR ================= */
+
         #sidebar {
-            width: var(--sidebar-width);
+            width: 260px;
             height: 100vh;
             position: fixed;
-            left: 0;
             top: 0;
-            background: var(--sidebar-bg);
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            left: 0;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
             z-index: 1000;
-            transition: all 0.3s;
+            transition: all .3s ease;
         }
 
         .sidebar-header {
+            height: 70px;
             padding: 20px;
-            height: var(--header-height);
             display: flex;
             align-items: center;
-            border-bottom: 1px solid #f1f2f3;
+            border-bottom: 1px solid #eee;
         }
 
         .sidebar-header h4 {
-            margin: 0;
             font-weight: 700;
-            color: var(--primary-color);
-            letter-spacing: 1px;
+            color: #4361ee;
+            margin: 0;
         }
 
         .sidebar-menu {
             padding: 20px 0;
-            height: calc(100vh - var(--header-height));
+            height: calc(100vh - 70px);
             overflow-y: auto;
         }
 
@@ -70,56 +58,54 @@
             padding: 10px 25px;
             font-size: 11px;
             font-weight: 700;
+            color: #999;
             text-transform: uppercase;
-            color: #afb2bb;
-            letter-spacing: 1px;
         }
 
         .nav-link {
             padding: 12px 25px;
-            color: var(--sidebar-color);
             display: flex;
             align-items: center;
+            color: #3b3f5c;
             font-weight: 500;
-            transition: all 0.2s;
             border-left: 3px solid transparent;
+            transition: .2s;
         }
 
         .nav-link i {
             width: 20px;
-            margin-right: 15px;
-            font-size: 18px;
-            text-align: center;
+            margin-right: 12px;
         }
 
         .nav-link:hover {
-            background-color: var(--sidebar-active-bg);
-            color: var(--sidebar-active-color);
+            background: rgba(67, 97, 238, .08);
+            color: #4361ee;
         }
 
         .nav-link.active {
-            background-color: var(--sidebar-active-bg);
-            color: var(--sidebar-active-color);
-            border-left-color: var(--primary-color);
+            background: rgba(67, 97, 238, .08);
+            color: #4361ee;
+            border-left-color: #4361ee;
         }
 
-        /* Main Content Styling */
+        /* ================= MAIN CONTENT ================= */
+
         #main-content {
-            margin-left: var(--sidebar-width);
+            margin-left: 260px;
             min-height: 100vh;
-            transition: all 0.3s;
             display: flex;
             flex-direction: column;
+            transition: margin-left .3s ease;
         }
 
         header {
-            height: var(--header-height);
+            height: 70px;
             background: #fff;
             padding: 0 30px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .04);
             position: sticky;
             top: 0;
             z-index: 999;
@@ -133,13 +119,14 @@
         footer {
             padding: 20px 30px;
             background: #fff;
-            border-top: 1px solid #f1f2f3;
+            border-top: 1px solid #eee;
             text-align: center;
             color: #888ea8;
             font-size: 14px;
         }
 
-        /* Profile Dropdown */
+        /* ================= PROFILE ================= */
+
         .profile-dropdown img {
             width: 35px;
             height: 35px;
@@ -147,9 +134,12 @@
             object-fit: cover;
         }
 
-        @media (max-width: 992px) {
+        /* ================= MOBILE ================= */
+
+        @media(max-width:992px) {
+
             #sidebar {
-                left: calc(-1 * var(--sidebar-width));
+                left: -260px;
             }
 
             #sidebar.active {
@@ -159,9 +149,29 @@
             #main-content {
                 margin-left: 0;
             }
+
+        }
+
+        /* ================= OVERLAY ================= */
+
+        #overlay {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .4);
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        #overlay.active {
+            display: block;
         }
     </style>
+
     @yield('styles')
+
 </head>
 
 <body>
@@ -169,18 +179,20 @@
     <!-- Sidebar -->
     @include('admin.partials.sidebar')
 
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
     <!-- Main Content -->
     <div id="main-content">
-        <!-- Header -->
+
         @include('admin.partials.header')
 
-        <!-- Page Content -->
         <main class="admin-content">
             @yield('content')
         </main>
 
-        <!-- Footer -->
         @include('admin.partials.footer')
+
     </div>
 
     <!-- Scripts -->
@@ -189,14 +201,25 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Toggle Sidebar for Mobile
+
         $(document).ready(function () {
-            $('#sidebarCollapse').on('click', function () {
+
+            $('#sidebarCollapse').click(function () {
                 $('#sidebar').toggleClass('active');
+                $('#overlay').toggleClass('active');
             });
+
+            $('#overlay').click(function () {
+                $('#sidebar').removeClass('active');
+                $('#overlay').removeClass('active');
+            });
+
         });
+
     </script>
+
     @yield('scripts')
+
 </body>
 
 </html>

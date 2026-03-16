@@ -41,21 +41,5 @@
                 </a>
             </li>
         </ul>
-
-        <p class="menu-label">System</p>
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-history"></i>
-                    <span>Audit Logs</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-cogs"></i>
-                    <span>Settings</span>
-                </a>
-            </li>
-        </ul>
     </div>
 </aside>

@@ -14,22 +14,6 @@
     </div>
 
     <div class="d-flex align-items-center">
-        <!-- Notifications -->
-        <div class="dropdown me-3">
-            <a class="nav-link dropdown-toggle text-muted" href="#" role="button" data-bs-toggle="dropdown">
-                <i class="far fa-bell fs-5"></i>
-                <span class="position-absolute translate-middle badge rounded-pill bg-danger" style="margin-left: -5px; margin-top: -5px; padding: 3px 5px; font-size: 8px;">
-                    3
-                </span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                <li><h6 class="dropdown-header">Notifications</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">New file uploaded</a></li>
-                <li><a class="dropdown-item" href="#">System update complete</a></li>
-                <li><a class="dropdown-item" href="#">User report ready</a></li>
-            </ul>
-        </div>
 
         <!-- User Profile -->
         <div class="dropdown profile-dropdown">
@@ -41,11 +25,11 @@
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=4361ee&color=fff" alt="Profile">
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                <li><a class="dropdown-item" href="{{ route('user.profile') }}"><i class="far fa-user me-2"></i> My Profile</a></li>
+                <li><a class="dropdown-item" href=""><i class="far fa-user me-2"></i> My Profile</a></li>
                 <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                    <form id="logout-form" action="{{ route('api.logout.user') }}" method="POST" style="display: none;">
+                    <form id="logout-form" action="" method="POST" style="display: none;">
                         @csrf
                     </form>
                     <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
