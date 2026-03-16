@@ -195,7 +195,7 @@
                         let totalSize = folder.total_size ? (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
                         html += `
                             <tr>
-                                <td onclick="window.location.href='{{ route('folders.show', ':id') }}'.replace(':id', folder.id)" style="cursor:pointer;">
+                                <td onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
                                     <div class="d-flex align-items-center">
                                         <div class="me-3" style="width:35px;height:35px;background:#fff8e1;border-radius:10px;display:flex;align-items:center;justify-content:center;">
                                             <i class="fa fa-folder text-warning"></i>

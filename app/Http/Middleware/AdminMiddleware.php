@@ -19,6 +19,6 @@ class AdminMiddleware
             return $next($request);
         }
 
-        return redirect()->route('user.dashboard')->with('error', 'You do not have admin access.');
+        return redirect()->route('login')->with('error', 'Unauthorized user.');
     }
 }

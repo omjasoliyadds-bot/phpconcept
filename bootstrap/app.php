@@ -13,14 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
-        $middleware->prependToGroup('api', \App\Http\Middleware\ForceJsonResponse::class);
         $middleware->alias([
             'activated' => \App\Http\Middleware\EnsureAccountIsActivated::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'user' => \App\Http\Middleware\UserMiddleware::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('user.dashboard'));
-    })
+        $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('login'));
+        $middleware->redirectUsersTo(fn () => auth()->user()->isUser() ? route('user.dashboard') : route('login'));    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
