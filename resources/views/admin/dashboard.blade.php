@@ -24,7 +24,7 @@
                     </div>
                 </div>
                 <h6 class="text-muted mb-1 fw-medium text-uppercase small">Total Users</h6>
-                <h2 class="fw-bold mb-0">1,280</h2>
+                <h2 class="fw-bold mb-0"><?= $users ?></h2>
             </div>
         </div>
     </div>
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <h6 class="text-muted mb-1 fw-medium text-uppercase small">Documents</h6>
-                <h2 class="fw-bold mb-0">8,432</h2>
+                <h2 class="fw-bold mb-0"><?= $documents ?></h2>
             </div>
         </div>
     </div>

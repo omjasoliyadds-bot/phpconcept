@@ -6,41 +6,48 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\FolderController;  
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\Admin\AdminController;
 
 // Public API Routes
 Route::post('register', [UserController::class, 'store'])->name('api.user.store');
 Route::post('login', [UserController::class, 'login'])->name('api.login.user');
-Route::get('activate-account/{token}', [UserController::class,'activateAccount'])->name('activate.account');
-Route::post('forgot-password', [ForgotPasswordController::class,'sendResetLinkEmail'])->name('password.email');
-Route::post('reset', [ForgotPasswordController::class,'reset'])->name('api.password.reset');
+Route::get('activate-account/{token}', [UserController::class, 'activateAccount'])->name('activate.account');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::post('reset', [ForgotPasswordController::class, 'reset'])->name('api.password.reset');
 
 // Protected API Routes
-Route::middleware(['auth:sanctum', 'activated'])->group(function () {
-    Route::get('user', function (Request $request) {
-        return $request->user();
-    })->name('api.user');
-
-    Route::post('logout', [UserController::class, 'logout'])->name('api.logout.user');
-    Route::post('update', [UserController::class, 'updateProfile'])->name('user.profile.update');
-    Route::post('change-password', [UserController::class, 'changePassword'])->name('api.user.change-password');
-
-    // Folder Routes
-    Route::prefix('folders')->group(function () {
-
-        Route::post('/store', [FolderController::class, 'folderCreate'])->name('folders.store');
-        Route::get('/all', [FolderController::class, 'getAllFolders'])->name('folders.all');
-        Route::get('/explorer', [FolderController::class, 'getExplorerData'])->name('folders.explorer');
-        Route::delete('/{id}', [FolderController::class, 'removeFolder'])->name('folders.remove');
-        Route::get('/{id}/files', [FolderController::class, 'folderFiles'])->name('folders.files');
-        Route::put('/{id}', [FolderController::class, 'updateFolderName'])->name('folders.update');
-
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Admin Only API Routes
+    Route::middleware(['admin'])->prefix('admin')->group(function () {
+        Route::post('/logout', [AdminController::class, 'logout'])->name('api.admin.logout');
     });
 
-    // Document Routes
-    Route::prefix('documents')->group(function () {
-        Route::post('/upload', [DocumentController::class, 'store'])->name('api.documents.upload');
-        Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
-        Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
-        Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+    // Activated User API Routes
+    Route::middleware(['activated'])->group(function () {
+        Route::get('user', function (Request $request) {
+            return $request->user();
+        })->name('api.user');
+
+        Route::post('logout', [UserController::class, 'logout'])->name('api.logout.user');
+        Route::post('update', [UserController::class, 'updateProfile'])->name('api.user.profile.update');
+        Route::post('change-password', [UserController::class, 'changePassword'])->name('api.user.change-password');
+
+        // Folder API Routes
+        Route::prefix('folders')->group(function () {
+            Route::post('/store', [FolderController::class, 'folderCreate'])->name('api.folders.store');
+            Route::get('/all', [FolderController::class, 'getAllFolders'])->name('api.folders.all');
+            Route::get('/explorer', [FolderController::class, 'getExplorerData'])->name('api.folders.explorer');
+            Route::delete('/{id}', [FolderController::class, 'removeFolder'])->name('api.folders.remove');
+            Route::get('/{id}/files', [FolderController::class, 'folderFiles'])->name('api.folders.files');
+            Route::put('/{id}', [FolderController::class, 'updateFolderName'])->name('api.folders.update');
+        });
+
+        // Document API Routes
+        Route::prefix('documents')->group(function () {
+            Route::post('/upload', [DocumentController::class, 'store'])->name('api.documents.upload');
+            Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
+            Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
+            Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+        });
     });
 });

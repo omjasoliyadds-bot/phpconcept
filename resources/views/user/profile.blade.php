@@ -97,7 +97,7 @@
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Updating...');
                     
                     $.ajax({
-                        url: "{{ route('user.profile.update') }}",
+                        url: "{{ route('api.user.profile.update') }}",
                         method: 'POST',
                         data: $(form).serialize(),
                         success: function (response) {

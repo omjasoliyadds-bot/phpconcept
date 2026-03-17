@@ -72,44 +72,40 @@ class UserController extends Controller
         }
 
         $user = Auth::user();
+
         if (!$user->email_verified_at) {
-            Auth::logout(); // Log out from web guard
             return response()->json([
                 "status" => false,
                 "message" => "Please verify your email before login."
             ]);
         }
-        // Regenerate session for web dashboard access
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
 
+        $request->session()->regenerate();
+        // Create token
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        $redirectUrl = $user->isAdmin() ? route('admin.dashboard') : route('user.dashboard');
-
+        $redirectUrl = $user->isAdmin()
+            ? route('admin.dashboard')
+            : route('user.dashboard');
         return response()->json([
             "status" => true,
             "message" => "Login successful",
             "token" => $token,
-            "redirect_url" => $redirectUrl,
-            "data" => $user
+            "role" => $user->role,
+            "data" => $user,
+            "redirect_url"=> $redirectUrl
         ]);
     }
 
     public function logout(Request $request)
     {
-
         if ($request->user()) {
             $request->user()->tokens()->delete();
         }
 
-        Auth::guard('web')->logout();
+        Auth::logout();
 
-        if ($request->hasSession()) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'status' => true,

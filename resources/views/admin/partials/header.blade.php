@@ -62,7 +62,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('admin.logout') }}",
+                            url: "{{ route('api.admin.logout') }}",
                             type: 'POST',
                             data: {
                                 _token: "{{ csrf_token() }}"

@@ -4,36 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Models\Document;
 
 class AdminController extends Controller
 {
-    /**
-     * Display the admin dashboard.
-     */
     public function index()
     {
-        return view('admin.dashboard');
+        $users = User::all()->where('role', 'user')->count();
+        $documents = Document::all()->count();
+        return view('admin.dashboard', compact('users','documents'));
     }
 
     public function users()
     {
         return view('admin.users');
     }
-    public function logout(Request $request)
-    {
-        if ($request->user()) {
-            $request->user()->tokens()->delete();
-        }
-        Auth::logout();
-        if ($request->hasSession()) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Logged out successfully'
-        ]);
-    }
+  
 }

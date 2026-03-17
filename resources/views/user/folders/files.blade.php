@@ -207,7 +207,7 @@
             function loadFolderContents() {
                 let folderId = "{{ $folder->id }}";
                 $.ajax({
-                    url: "{{ route('folders.files', $folder->id) }}",
+                    url: "{{ route('api.folders.files', $folder->id) }}",
                     type: "GET",
                     success: function (response) {
                         let html = '';
@@ -265,7 +265,7 @@
                                                                     data-name="${file.name.split('.').slice(0, -1).join('.')}">
                                                                 <i class="fa fa-edit"></i>
                                                             </button>
-                                                            <a href="/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
+                                                            <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
                                                                 <i class="fa fa-download"></i>
                                                             </a>
                                                             <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
@@ -295,7 +295,7 @@
             $('#createFolderForm').on('submit', function (e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('folders.store') }}",
+                    url: "{{ route('api.folders.store') }}",
                     method: "POST",
                     data: new FormData(this),
                     contentType: false,
@@ -315,7 +315,7 @@
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('documents.upload') }}",
+                    url: "{{ route('api.documents.upload') }}",
                     method: "POST",
                     data: new FormData(this),
                     processData: false,
@@ -344,7 +344,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('folders.remove', ':id') }}".replace(':id', id),
+                            url: "{{ route('api.folders.remove', ':id') }}".replace(':id', id),
                             type: "DELETE",
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
@@ -395,7 +395,7 @@
                 let formData = $(this).serialize();
 
                 $.ajax({
-                    url: "{{ route('folders.update', ':id') }}".replace(':id', id),
+                    url: "{{ route('api.folders.update', ':id') }}".replace(':id', id),
                     method: "PUT",
                     data: formData,
                     success: function (response) {

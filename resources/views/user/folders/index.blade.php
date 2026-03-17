@@ -109,7 +109,7 @@
             $('#createFolderForm').on('submit', function (e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('folders.store') }}",
+                    url: "{{ route('api.folders.store') }}",
                     method: "POST",
                     data: new FormData(this),
                     contentType: false,
@@ -135,7 +135,7 @@
                 e.preventDefault();
                 let id = $('#folder_id').val();
                 $.ajax({
-                    url: "{{ route('folders.update', ':id') }}".replace(':id', id),
+                    url: "{{ route('api.folders.update', ':id') }}".replace(':id', id),
                     method: "PUT",
                     data: $(this).serialize(),
                     success: function (response) {
@@ -160,7 +160,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('folders.remove', ':id') }}".replace(':id', id),
+                            url: "{{ route('api.folders.remove', ':id') }}".replace(':id', id),
                             type: "DELETE",
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
@@ -200,7 +200,7 @@
 
             function allFolderLoad() {
                 $.ajax({
-                    url: "{{ route('folders.all') }}",
+                    url: "{{ route('api.folders.all') }}",
                     method: "GET",
                     success: function (response) {
                         if (response.status) {

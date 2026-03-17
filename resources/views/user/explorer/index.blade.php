@@ -171,7 +171,7 @@
             // Load Explorer Data
             function loadExplorer() {
                 $.ajax({
-                    url: "{{ route('folders.explorer') }}",
+                    url: "{{ route('api.folders.explorer') }}",
                     method: "GET",
                     success: function (response) {
                         if (response.status) {
@@ -182,7 +182,7 @@
 
                 // Fetch all folders for dropdown
                 $.ajax({
-                    url: "{{ route('folders.all') }}",
+                    url: "{{ route('api.folders.all') }}",
                     method: "GET",
                     success: function (response) {
                         if (response.status) {
@@ -251,7 +251,7 @@
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
-                                    <a href="/documents/${file.id}/download" class="btn btn-sm btn-outline-primary">
+                                    <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-primary">
                                         <i class="fa fa-download"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
@@ -285,7 +285,7 @@
             $('#createFolderForm').on('submit', function (e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('folders.store') }}",
+                    url: "{{ route('api.folders.store') }}",
                     method: "POST",
                     data: new FormData(this),
                     contentType: false,
@@ -312,7 +312,7 @@
                 e.preventDefault();
                 let id = $('#folder_id').val();
                 $.ajax({
-                    url: "{{ route('folders.update', ':id') }}".replace(':id', id),
+                    url: "{{ route('api.folders.update', ':id') }}".replace(':id', id),
                     method: "PUT",
                     data: $(this).serialize(),
                     success: function (response) {
@@ -338,7 +338,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('folders.remove', ':id') }}".replace(':id', id),
+                            url: "{{ route('api.folders.remove', ':id') }}".replace(':id', id),
                             type: "DELETE",
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
@@ -356,7 +356,7 @@
             $('#uploadForm').on('submit', function (e) {
                 e.preventDefault();
                 $.ajax({
-                    url: "{{ route('documents.upload') }}",
+                    url: "{{ route('api.documents.upload') }}",
                     method: "POST",
                     data: new FormData(this),
                     processData: false,
