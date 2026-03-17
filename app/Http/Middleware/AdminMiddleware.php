@@ -19,6 +19,10 @@ class AdminMiddleware
             return $next($request);
         }
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['message' => 'Unauthorized user.'], 403);
+        }
+
         return redirect()->route('login')->with('error', 'Unauthorized user.');
     }
 }

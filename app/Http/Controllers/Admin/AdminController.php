@@ -21,4 +21,8 @@ class AdminController extends Controller
         return view('admin.users');
     }
   
+    public function profile(Request $request){
+        $user =auth()->user();
+        return view('admin.profile', compact('user'));
+    }
 }

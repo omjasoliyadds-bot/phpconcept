@@ -19,14 +19,14 @@ Route::middleware(['guest'])->group(function () {
 // Admin View Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('users', [AdminController::class,'usersView'])->name('admin.users.view');
+    Route::get('users', [AdminController::class, 'usersView'])->name('admin.users.view');
+    Route::get('profile', [AdminController::class, 'profile'])->name('admin.profile');
 });
 
 // User View Routes
 Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('dashboard', [UserController::class, 'userDashboardView'])->name('user.dashboard');
     Route::get('profile', [UserController::class, 'userProfile'])->name('user.profile');
-    
     Route::get('/folders', [UserController::class, 'userFolders'])->name('folders.index');
     Route::get('/folders/{id}/files', [UserController::class, 'folderFiles'])->name('folders.show');
     Route::get('/explorer', [UserController::class, 'explorerView'])->name('explorer.index');

@@ -22,6 +22,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AdminController::class, 'logout'])->name('api.admin.logout');
         Route::get('/users-data', [AdminController::class, 'getUsers'])->name('admin.users.data');
         Route::post('/toggle-status', [AdminController::class, 'toggleStatus'])->name('admin.users.toggle');
+        Route::post('profile/update/{id}', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
+        Route::post('password/update', [AdminController::class, 'updatePassword'])->name('admin.password.update');
     });
 
     // Activated User API Routes

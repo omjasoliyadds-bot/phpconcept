@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 class AdminController extends Controller
 {
     public function logout(Request $request)
@@ -63,6 +64,49 @@ class AdminController extends Controller
         return response()->json([
             'status' => true,
             'message' => "User account {$statusLabel} successfully"
+        ]);
+    }
+    public function updateProfile(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profile updated successfully'
+        ]);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+        $user = auth()->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Current password does not match'
+            ], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password updated successfully'
         ]);
     }
 }
