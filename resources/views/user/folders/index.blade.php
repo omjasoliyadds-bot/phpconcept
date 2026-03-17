@@ -232,23 +232,23 @@
                 let padding = depth * 25;
 
                 let row = `
-                            <tr>
-                                <td class="ps-4" style="padding-left: ${padding + 24}px !important;" onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa fa-folder text-warning me-2"></i>
-                                        <span class="fw-medium" style="cursor:pointer;">${folder.name}</span>
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-light text-dark">Folder</span></td>
-                                <td><span class="badge bg-light text-dark">${subCount} Subfolders</span></td>
-                                <td>${size}</td>
-                                <td>${date}</td>
-                                <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-outline-info renameBtn" data-id="${folder.id}" data-name="${folder.name}"><i class="fa fa-edit"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger deleteBtn" data-id="${folder.id}"><i class="fa fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td class="ps-4" style="padding-left: ${padding + 24}px !important;" onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa fa-folder text-warning me-2"></i>
+                                            <span class="fw-medium" style="cursor:pointer;">${folder.name}</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark">Folder</span></td>
+                                    <td><span class="badge bg-light text-dark">${subCount} Subfolders</span></td>
+                                    <td>${size}</td>
+                                    <td>${date}</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-info renameBtn" data-id="${folder.id}" data-name="${folder.name}"><i class="fa fa-edit"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger deleteBtn" data-id="${folder.id}"><i class="fa fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            `;
 
                 return row;
             }

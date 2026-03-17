@@ -8,6 +8,7 @@ use App\Models\Document;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Models\Folder;
 
 class DocumentController extends Controller
 {
@@ -30,7 +31,7 @@ class DocumentController extends Controller
         $folderId = $request->folder_id;
 
         if ($folderId) {
-            $folder = \App\Models\Folder::where('id', $folderId)
+            $folder = Folder::where('id', $folderId)
                 ->where('user_id', $userId)
                 ->first();
             
@@ -62,7 +63,7 @@ class DocumentController extends Controller
         
         // Store in 'local' storage (private by default)
         // Path: storage/app/documents/{user_id}/{filename}
-        $path = $file->store('documents/' . auth()->id());
+        $path = $file->store('documents/' . auth()->id(), 'public');
 
         $document = Document::create([
             'user_id' => auth()->id(),
@@ -156,7 +157,8 @@ class DocumentController extends Controller
         $document = Document::where('id', $id)
             ->where(function($query) {
                 $query->where('user_id', auth()->id())
-                      ->orWhereHas('sharedUsers', function($q) {
+                        ->orWhere('is_public', true)
+                        ->orWhereHas('sharedUsers', function($q) {
                           $q->where('users.id', auth()->id());
                       });
             })->firstOrFail();

@@ -271,6 +271,9 @@
                                                             <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
                                                                 <i class="fa fa-download"></i>
                                                             </a>
+                                                            <button class="btn btn-sm btn-outline-primary shareDocBtn" data-id="${file.id}">
+                                                                <i class="fa fa-share-alt"></i>
+                                                            </button>
                                                             <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>

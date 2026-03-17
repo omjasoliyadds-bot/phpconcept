@@ -34,7 +34,7 @@ class FolderController extends Controller
             $parentFolder = Folder::where('id', $parentId)
                 ->where('user_id', $userId)
                 ->first();
-            
+
             if (!$parentFolder) {
                 return response()->json([
                     "status" => false,
@@ -115,7 +115,7 @@ class FolderController extends Controller
             "folder" => $folder,
             "subfolders" => $folder->subfolders,
             "files" => $folder->files,
-            "totalSize"=> $folder->total_size
+            "totalSize" => $folder->total_size
         ]);
     }
 

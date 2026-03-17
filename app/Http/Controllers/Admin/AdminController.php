@@ -13,7 +13,9 @@ class AdminController extends Controller
     {
         $users = User::all()->where('role', 'user')->count();
         $documents = Document::all()->count();
-        return view('admin.dashboard', compact('users','documents'));
+        $totalSize = Document::all()->sum('size');
+        $totalSizeMb = number_format(($totalSize / (1024 * 1024)), 2, '.', ' ');
+        return view('admin.dashboard', compact('users','documents','totalSizeMb'));
     }
 
     public function usersView()

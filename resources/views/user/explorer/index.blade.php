@@ -260,6 +260,9 @@
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
                                         <i class="fa fa-edit"></i>
                                     </button>
+                                    <button class="btn btn-sm btn-outline-primary shareDocBtn" data-id="${file.id}">
+                                        <i class="fa fa-share-alt"></i>
+                                    </button>
                                     <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
                                         <i class="fa fa-trash"></i>
                                     </button>
