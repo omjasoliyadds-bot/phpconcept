@@ -20,6 +20,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Admin Only API Routes
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::post('/logout', [AdminController::class, 'logout'])->name('api.admin.logout');
+        Route::get('/users-data', [AdminController::class, 'getUsers'])->name('admin.users.data');
+        Route::post('/toggle-status', [AdminController::class, 'toggleStatus'])->name('admin.users.toggle');
     });
 
     // Activated User API Routes

@@ -13,7 +13,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('admin.users.view') }}" class="nav-link {{ request()->routeIs('admin.users.view') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span>User Management</span>
                 </a>

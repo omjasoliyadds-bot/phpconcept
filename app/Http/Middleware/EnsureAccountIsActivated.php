@@ -17,16 +17,30 @@ class EnsureAccountIsActivated
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->email_verified_at) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Your account is not activated. Please check your email for the activation link.'
-                ], 403);
+        if ($request->user()) {
+            if (!$request->user()->email_verified_at) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Your account is not activated. Please check your email for the activation link.'
+                    ], 403);
+                }
+
+                Auth::logout();
+                return redirect()->route('login')->with('error', 'Please activate your account first.');
             }
 
-            Auth::logout();
-            return redirect()->route('login')->with('error', 'Please activate your account first.');
+            if ($request->user()->status == 0) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Your account has been deactivated by the administrator.'
+                    ], 403);
+                }
+
+                Auth::logout();
+                return redirect()->route('login')->with('error', 'Your account has been deactivated.');
+            }
         }
 
         return $next($request);

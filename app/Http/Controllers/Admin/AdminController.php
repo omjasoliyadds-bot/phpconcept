@@ -16,7 +16,7 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('users','documents'));
     }
 
-    public function users()
+    public function usersView()
     {
         return view('admin.users');
     }

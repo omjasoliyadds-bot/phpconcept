@@ -80,6 +80,14 @@ class UserController extends Controller
             ]);
         }
 
+        if ($user->status == 0) {
+            Auth::logout();
+            return response()->json([
+                "status" => false,
+                "message" => "Your account has been deactivated by the admin."
+            ]);
+        }
+
         $request->session()->regenerate();
         // Create token
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -102,7 +110,7 @@ class UserController extends Controller
             $request->user()->tokens()->delete();
         }
 
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

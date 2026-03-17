@@ -19,6 +19,7 @@ Route::middleware(['guest'])->group(function () {
 // Admin View Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('users', [AdminController::class,'usersView'])->name('admin.users.view');
 });
 
 // User View Routes
