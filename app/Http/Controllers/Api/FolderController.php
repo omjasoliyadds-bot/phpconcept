@@ -109,14 +109,13 @@ class FolderController extends Controller
             ->where('user_id', $userId)
             ->with(['files', 'subfolders'])
             ->firstOrFail();
-        $totalSize = $folder->files->sum('size');
 
         return response()->json([
             "status" => true,
             "folder" => $folder,
             "subfolders" => $folder->subfolders,
             "files" => $folder->files,
-            "totalSize"=> $totalSize
+            "totalSize"=> $folder->total_size
         ]);
     }
 

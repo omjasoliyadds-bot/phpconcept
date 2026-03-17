@@ -15,7 +15,7 @@ class Folder extends Model
      
     ];
 
-    protected $appends = ['total_size'];
+    protected $appends = ['total_size', 'items_count', 'subfolder_count'];
 
     public function files()
     {
@@ -29,7 +29,32 @@ class Folder extends Model
 
     public function getTotalSizeAttribute()
     {
-        return $this->files()->sum('size');
+        $directFilesSize = $this->files()->sum('size') ?: 0;
+        $subfoldersSize = 0;
+        
+        // Eager loading subfolders would help, but for now we follow the simple recursive approach
+        foreach ($this->subfolders as $subfolder) {
+            $subfoldersSize += $subfolder->total_size;
+        }
+
+        return $directFilesSize + $subfoldersSize;
+    }
+
+    public function getItemsCountAttribute()
+    {
+        $directFilesCount = $this->files()->count();
+        $subfoldersCount = $this->subfolders()->count();
+        
+        foreach ($this->subfolders as $subfolder) {
+            $directFilesCount += $subfolder->items_count;
+        }
+
+        return $directFilesCount + $subfoldersCount;
+    }
+
+    public function getSubfolderCountAttribute()
+    {
+        return $this->subfolders()->count();
     }
     
 }

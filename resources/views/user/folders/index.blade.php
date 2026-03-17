@@ -84,16 +84,17 @@
                 <thead class="bg-light">
                     <tr>
                         <th class="ps-4">Folder Name</th>
+                        <th>Type</th>
                         <th>Subfolders</th>
                         <th>Total Size</th>
-                        <th>Created Date</th>
+                        <th>Created At</th>
                         <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="allFolders">
                     <!-- Loaded via AJAX -->
                     <tr>
-                        <td colspan="5" class="text-center py-4">Loading...</td>
+                        <td colspan="6" class="text-center py-4 text-muted">Loading folders...</td>
                     </tr>
                 </tbody>
             </table>
@@ -215,7 +216,7 @@
                 let rootFolders = folders.filter(f => !f.parent_id);
 
                 if (rootFolders.length === 0) {
-                    html = '<tr><td colspan="5" class="text-center py-4 text-muted">No folders found</td></tr>';
+                    html = '<tr><td colspan="6" class="text-center py-4 text-muted">No folders found</td></tr>';
                 } else {
                     rootFolders.forEach(folder => {
                         html += renderFolderRow(folder, folders, 0);
@@ -227,7 +228,7 @@
             function renderFolderRow(folder, allFolders, depth) {
                 let date = new Date(folder.created_at).toLocaleDateString();
                 let size = (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB';
-                let subCount = allFolders.filter(f => f.parent_id == folder.id).length;
+                let subCount = folder.subfolder_count || 0;
                 let padding = depth * 25;
 
                 let row = `
@@ -238,7 +239,8 @@
                                         <span class="fw-medium" style="cursor:pointer;">${folder.name}</span>
                                     </div>
                                 </td>
-                                <td><span class="badge bg-light text-dark">${subCount} Items</span></td>
+                                <td><span class="badge bg-light text-dark">Folder</span></td>
+                                <td><span class="badge bg-light text-dark">${subCount} Subfolders</span></td>
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end pe-4">

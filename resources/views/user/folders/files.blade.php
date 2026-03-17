@@ -37,17 +37,18 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th class="ps-4">Name</th>
+                        <th class="ps-4" style="width: 30%">Name</th>
                         <th>Type</th>
-                        <th>Size</th>
-                        <th>Created Date</th>
+                        <th>Subfolders</th>
+                        <th>Total Size</th>
+                        <th>Created At</th>
                         <th class="text-end pe-4">Action</th>
                     </tr>
                 </thead>
 
                 <tbody id="filesList">
                     <tr>
-                        <td colspan="5" class="text-center py-5">
+                        <td colspan="6" class="text-center py-5">
                             <div class="spinner-border text-primary opacity-50" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -217,18 +218,20 @@
                             if (response.subfolders && response.subfolders.length > 0) {
                                 response.subfolders.forEach(sub => {
                                     let date = new Date(sub.created_at).toLocaleDateString();
+                                    let totalSize = sub.total_size ? (sub.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
                                     html += `
                                                 <tr>
                                                     <td class="ps-4" onclick="window.location.href='/folders/${sub.id}/files'" style="cursor:pointer;">
                                                         <div class="d-flex align-items-center">
                                                             <div class="me-3" style="width:35px;height:35px;background:#fff8e1;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                                                                <i class="fa fa-folder text-warning"></i>
+                                                                  <i class="fa fa-folder text-warning"></i>
                                                             </div>
                                                             <span class="fw-medium">${sub.name}</span>
                                                         </div>
                                                     </td>
                                                     <td><span class="badge bg-light text-dark">Folder</span></td>
-                                                    <td>-</td>
+                                                    <td><span class="badge bg-light text-dark">${sub.subfolder_count} Subfolders</span></td>
+                                                    <td>${totalSize}</td>
                                                     <td>${date}</td>
                                                     <td class="text-end pe-4">
                                                         <button class="btn btn-sm btn-outline-danger deleteFolderBtn" data-id="${sub.id}">
@@ -244,6 +247,7 @@
                             if (response.files.length > 0) {
                                 response.files.forEach(file => {
                                     let date = new Date(file.created_at).toLocaleDateString();
+                                    let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
                                     html += `
                                                     <tr>
                                                         <td class="ps-4">
@@ -255,9 +259,8 @@
                                                             </div>
                                                         </td>
                                                         <td><span class="badge bg-light text-dark text-uppercase">${file.extension}</span></td>
-                                                        <td>
-                                                            ${(file.size / 1024 / 1024).toFixed(2)} MB
-                                                        </td>
+                                                        <td>-</td>
+                                                        <td>${size}</td>
                                                         <td>${date}</td>
                                                         <td class="text-end pe-4">
                                                             <button class="btn btn-sm btn-outline-info renameDocBtn" 
@@ -278,7 +281,7 @@
                             }
 
                             if ((!response.subfolders || response.subfolders.length === 0) && response.files.length === 0) {
-                                html = '<tr><td colspan="5" class="text-center py-5 text-muted">This folder is empty</td></tr>';
+                                html = '<tr><td colspan="6" class="text-center py-5 text-muted">This folder is empty</td></tr>';
                             }
 
                             if (response.totalSize !== undefined) {

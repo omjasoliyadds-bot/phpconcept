@@ -18,17 +18,18 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th style="width: 40%">Name</th>
+                        <th style="width: 30%">Name</th>
                         <th>Type</th>
-                        <th>Size</th>
-                        <th>Date Modified</th>
+                        <th>Subfolders</th>
+                        <th>Total Size</th>
+                        <th>Created At</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="explorerTableBody">
                     <!-- Data will be loaded via AJAX -->
                     <tr>
-                        <td colspan="5" class="text-center py-5">
+                        <td colspan="6" class="text-center py-5">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -213,7 +214,8 @@
                                         <span class="fw-medium">${folder.name}</span>
                                     </div>
                                 </td>
-                                <td><span class="badge bg-light text-dark">Folder</span></td>
+                                <td> <span class="badge bg-light text-dark">Folder</span></td>
+                                <td><span class="badge bg-light text-dark">${folder.subfolder_count} Subfolders</span></td>
                                 <td>${totalSize}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
@@ -248,6 +250,7 @@
                                     </div>
                                 </td>
                                 <td><span class="badge bg-light text-dark text-uppercase">${file.extension}</span></td>
+                                <td>-</td>
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
@@ -267,7 +270,7 @@
                 }
 
                 if (folders.length === 0 && files.length === 0) {
-                    html = `<tr><td colspan="5" class="text-center py-5 text-muted">No folders or files found.</td></tr>`;
+                    html = `<tr><td colspan="6" class="text-center py-5 text-muted">No folders or files found.</td></tr>`;
                 }
 
                 $('#explorerTableBody').html(html);
