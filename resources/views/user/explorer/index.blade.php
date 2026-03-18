@@ -131,6 +131,41 @@
         </div>
     </div>
 
+    <!-- Share Document Modal -->
+    <div class="modal fade" id="shareModal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-sm border-0 rounded-3">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="fa fa-share-alt text-primary me-2"></i> Share Document
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="share_doc_id">
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Share with Users</label>
+                        <select id="userSelect" class="form-select select2" multiple>
+                            @foreach ($users as $user)
+                                <option  value="{{ $user->id }}">{{ $user->name }}</option>
+                                <hr>
+                            @endforeach
+                        </select>
+                        <div class="mt-2">
+                            <button id="confirmShareBtn" class="btn btn-primary w-100">Invite Selected Users</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">People with access</h6>
+                    <div id="sharedUsersList" class="list-group list-group-flush">
+                        <!-- Shared users will be listed here -->
+                        <div class="text-center py-3 text-muted">Loading shared users...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Upload Modal --}}
     <div class="modal fade" id="uploadModal" tabindex="-1">
         <div class="modal-dialog">
@@ -260,7 +295,7 @@
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
                                         <i class="fa fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-primary shareDocBtn" data-id="${file.id}">
+                                    <button class="btn btn-sm btn-outline-primary shareDocBtn" data-id="${file.id}" data-bs-toggle="modal" data-bs-target="#shareModal">
                                         <i class="fa fa-share-alt"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">

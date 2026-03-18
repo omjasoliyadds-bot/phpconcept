@@ -5,7 +5,7 @@ use App\Models\Document;
 use Carbon\Carbon;
 use App\Models\Folder;
 use Illuminate\Http\Request;
-
+use App\Models\User;
 class UserController extends Controller
 {
     public function loginView()
@@ -35,7 +35,8 @@ class UserController extends Controller
     }
     public function explorerView()
     {
-        return view('user.explorer.index');
+        $users = User::all()->where('role', '!=', 'admin');
+        return view('user.explorer.index', compact('users'));
     }
 }
 

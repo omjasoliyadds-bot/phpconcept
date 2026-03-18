@@ -152,6 +152,10 @@
                         equalTo: "#new_password"
                     }
                 },
+                 errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
                 submitHandler: function(form) {
                     $.ajax({
                         url: "{{ route('admin.password.update') }}",

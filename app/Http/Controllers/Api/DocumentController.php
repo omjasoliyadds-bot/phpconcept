@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Folder;
+use Illuminate\Contracts\Filesystem\Filesystem;
 
 class DocumentController extends Controller
 {
@@ -34,7 +35,7 @@ class DocumentController extends Controller
             $folder = Folder::where('id', $folderId)
                 ->where('user_id', $userId)
                 ->first();
-            
+
             if (!$folder) {
                 return response()->json([
                     'status' => false,
@@ -60,7 +61,7 @@ class DocumentController extends Controller
         }
 
         $extension = $file->getClientOriginalExtension();
-        
+
         // Store in 'local' storage (private by default)
         // Path: storage/app/documents/{user_id}/{filename}
         $path = $file->store('documents/' . auth()->id(), 'public');
@@ -98,7 +99,7 @@ class DocumentController extends Controller
 
         $userId = auth()->id();
         $document = Document::where('id', $id)->where('user_id', $userId)->firstOrFail();
-        
+
         // Ensure extension stays the same
         $newName = $request->name;
         if (!Str::endsWith($newName, '.' . $document->extension)) {
@@ -155,18 +156,22 @@ class DocumentController extends Controller
     public function download($id)
     {
         $document = Document::where('id', $id)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('user_id', auth()->id())
-                        ->orWhere('is_public', true)
-                        ->orWhereHas('sharedUsers', function($q) {
-                          $q->where('users.id', auth()->id());
-                      });
-            })->firstOrFail();
+                    ->orWhere('is_public', true)
+                    ->orWhereHas('sharedUsers', function ($q) {
+                        $q->where('users.id', auth()->id());
+                    });
+            })
+            ->firstOrFail();
 
-        if (!Storage::exists($document->path)) {
+        if (!Storage::disk('public')->exists($document->path)) {
             abort(404, 'File not found on disk');
         }
 
-        return Storage::download($document->path, $document->name);
+        return Storage::disk('public')->download(
+            $document->path,
+            $document->name
+        );
     }
 }
