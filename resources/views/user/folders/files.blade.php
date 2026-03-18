@@ -1,6 +1,13 @@
 @extends('user.layouts.user')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+        }
+    </style>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-0 d-flex align-items-center">
@@ -200,10 +207,18 @@
     </div>
 </div>
 
+@include('user.partials.share-modal')
+
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
 
         $(document).ready(function () {
+            $('.select2').select2({
+                dropdownParent: $('#shareModal'),
+                width: '100%',
+                placeholder: '--Select Users--'
+            });
             loadFolderContents();
             function loadFolderContents() {
                 let folderId = "{{ $folder->id }}";
@@ -453,6 +468,60 @@
                                 timer: 1500
                             });
                         }
+                    }
+                });
+            });
+
+            // Document Share Logic
+            $(document).on('click', '.shareDocBtn', function () {
+                let docId = $(this).data('id');
+                $('#share_document_id').val(docId);
+                $('#share_users').val(null).trigger('change');
+                $('#shareModal').modal('show');
+            });
+
+            $('#shareBtn').on('click', function () {
+                let docId = $('#share_document_id').val();
+                let userIds = $('#share_users').val();
+                let permission = $('#permission').val();
+
+                if (!userIds || userIds.length === 0) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Please select at least one user.' });
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('documents.share', ':id') }}".replace(':id', docId),
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        user_ids: userIds,
+                        permission: permission
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            $('#shareModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Shared',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong.'
+                        });
                     }
                 });
             });

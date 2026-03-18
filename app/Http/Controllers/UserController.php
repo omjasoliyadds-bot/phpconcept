@@ -31,11 +31,12 @@ class UserController extends Controller
     public function folderFiles($id)
     {
         $folder = Folder::where('user_id', auth()->id())->findOrFail($id);
-        return view('user.folders.files', compact('folder'));
+        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->get();
+        return view('user.folders.files', compact('folder', 'users'));
     }
     public function explorerView()
     {
-        $users = User::all()->where('role', '!=', 'admin');
+        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->get();
         return view('user.explorer.index', compact('users'));
     }
 }

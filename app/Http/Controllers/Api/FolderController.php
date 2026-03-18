@@ -72,7 +72,7 @@ class FolderController extends Controller
     public function getAllFolders(Request $request)
     {
         $user_id = auth()->id();
-        $folders = Folder::where('user_id', $user_id)->with('subfolders')->get();
+        $folders = Folder::where('user_id', $user_id)->whereNull('parent_id')->with('subfolders')->get();
         $outsideFiles = Document::where('user_id', $user_id)->whereNull('folder_id')->get();
         return response()->json([
             "status" => true,

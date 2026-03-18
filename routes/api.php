@@ -52,6 +52,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
             Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
             Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+            Route::post('/{id}/share', [DocumentController::class,'share'])->name('documents.share');
         });
     });
 });

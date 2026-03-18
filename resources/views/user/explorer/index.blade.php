@@ -1,6 +1,13 @@
 @extends('user.layouts.user')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+        }
+    </style>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0">File Explorer</h4>
         <div class="d-flex gap-2">
@@ -59,7 +66,8 @@
                                 <span class="input-group-text bg-light border-end-0">
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
-                                <input type="text" name="name" class="form-control border-start-0" placeholder="Enter folder name" required>
+                                <input type="text" name="name" class="form-control border-start-0"
+                                    placeholder="Enter folder name" required>
                             </div>
                         </div>
                     </div>
@@ -92,7 +100,8 @@
                                 <span class="input-group-text bg-light border-end-0">
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
-                                <input type="text" name="name" class="form-control border-start-0" placeholder="Enter new folder name" required>
+                                <input type="text" name="name" class="form-control border-start-0"
+                                    placeholder="Enter new folder name" required>
                             </div>
                         </div>
                     </div>
@@ -131,40 +140,8 @@
         </div>
     </div>
 
-    <!-- Share Document Modal -->
-    <div class="modal fade" id="shareModal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-sm border-0 rounded-3">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-semibold">
-                        <i class="fa fa-share-alt text-primary me-2"></i> Share Document
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="share_doc_id">
-                    <div class="mb-4">
-                        <label class="form-label fw-medium">Share with Users</label>
-                        <select id="userSelect" class="form-select select2" multiple>
-                            @foreach ($users as $user)
-                                <option  value="{{ $user->id }}">{{ $user->name }}</option>
-                                <hr>
-                            @endforeach
-                        </select>
-                        <div class="mt-2">
-                            <button id="confirmShareBtn" class="btn btn-primary w-100">Invite Selected Users</button>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6 class="fw-bold mb-3">People with access</h6>
-                    <div id="sharedUsersList" class="list-group list-group-flush">
-                        <!-- Shared users will be listed here -->
-                        <div class="text-center py-3 text-muted">Loading shared users...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Share Modal -->
+@include('user.partials.share-modal')
 
     {{-- Upload Modal --}}
     <div class="modal fade" id="uploadModal" tabindex="-1">
@@ -202,6 +179,11 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
+            $('.select2').select2({
+                dropdownParent: $('#shareModal'),
+                width: '100%',
+                placeholder: '--Select Users--'
+            });
             loadExplorer();
 
             // Load Explorer Data
@@ -230,7 +212,7 @@
 
             function renderTable(folders, files) {
                 let html = '';
-                
+
                 // Folders
                 if (folders.length > 0) {
                     // html += `<tr><td colspan="5" class="bg-light fw-bold py-2"><i class="fa fa-folder text-warning me-2"></i> Folders</td></tr>`;
@@ -433,6 +415,46 @@
                             Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
                             loadExplorer();
                         }
+                    }
+                });
+            });
+
+            // Document Share Logic
+            $(document).on('click', '.shareDocBtn', function () {
+                let docId = $(this).data('id');
+                $('#share_document_id').val(docId);
+                $('#share_users').val(null).trigger('change');
+                $('#shareModal').modal('show');
+            });
+
+            $('#shareBtn').on('click', function () {
+                let docId = $('#share_document_id').val();
+                let userIds = $('#share_users').val();
+                let permission = $('#permission').val();
+
+                if (!userIds || userIds.length === 0) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Please select at least one user.' });
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('documents.share', ':id') }}".replace(':id', docId),
+                    method: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        user_ids: userIds,
+                        permission: permission
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            $('#shareModal').modal('hide');
+                            Swal.fire({ icon: 'success', title: 'Shared', text: response.message, timer: 1500, showConfirmButton: false });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: response.message });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong.' });
                     }
                 });
             });

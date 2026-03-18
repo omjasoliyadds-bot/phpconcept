@@ -35,7 +35,8 @@ class Document extends Model
 
     public function sharedUsers()
     {
-        return $this->belongsToMany(User::class, 'document_shares', 'document_id', 'user_id')
+        return $this->belongsToMany(User::class, 'document_user_permissions')
+            ->withPivot('permission')
             ->withTimestamps();
     }
 

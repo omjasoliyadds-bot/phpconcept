@@ -38,6 +38,12 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+    public function sharedDocuments()
+    {
+        return $this->belongsToMany(Document::class, 'document_user_permissions')
+            ->withPivot('permission')
+            ->withTimestamps();
+    }
 
     /**
      * The attributes that should be hidden for serialization.

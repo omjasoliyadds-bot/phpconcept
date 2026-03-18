@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Folder;
-use Illuminate\Contracts\Filesystem\Filesystem;
 
 class DocumentController extends Controller
 {
@@ -173,5 +172,54 @@ class DocumentController extends Controller
             $document->path,
             $document->name
         );
+    }
+    public function share(Request $request, $id)
+    {
+        $validate = Validator::make($request->all(), [
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'required|exists:users,id',
+            'permission' => 'required|in:view,edit,download'
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'status' => false,
+                'errors' => $validate->errors()
+            ]);
+        }
+
+        $document = Document::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        // already shared users
+        $alreadyShared = $document->sharedUsers()
+            ->whereIn('users.id', $request->user_ids)
+            ->pluck('users.id')
+            ->toArray();
+
+        $newUsers = array_diff($request->user_ids, $alreadyShared);
+
+        $syncData = [];
+        foreach ($newUsers as $user_id) {
+            $syncData[$user_id] = [
+                'permission' => $request->permission
+            ];
+        }
+
+        if (!empty($syncData)) {
+            $document->sharedUsers()->syncWithoutDetaching($syncData);
+        }
+        if(count($alreadyShared) > 0){
+           return response()->json([
+               'status'=> false,
+               'message' => 'Some users already have access'
+           ]);
+        }
+        return response()->json([
+            'status' => true,
+            'message' => 'File shared successfully',
+            'already_shared_users' => $alreadyShared
+        ]);
     }
 }
