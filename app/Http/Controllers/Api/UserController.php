@@ -47,7 +47,8 @@ class UserController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "Registration successful. Please check your email to activate your account."
+            "message" => "Registration successful. Please check your email to activate your account.",
+            "data" => $user
         ]);
     }
     public function login(Request $request)
@@ -64,15 +65,15 @@ class UserController extends Controller
             ]);
         }
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 "status" => false,
                 "message" => "Invalid Credentials",
-            ]);
+            ], 401);
         }
 
-        $user = Auth::user();
-
+        // Email verification check
         if (!$user->email_verified_at) {
             return response()->json([
                 "status" => false,
@@ -80,27 +81,26 @@ class UserController extends Controller
             ]);
         }
 
+        // Status check
         if ($user->status == 0) {
-            Auth::logout();
             return response()->json([
                 "status" => false,
                 "message" => "Your account has been deactivated by the admin."
             ]);
         }
 
-        $request->session()->regenerate();
-        // Create token
+        // Login user for session-based auth (Web/AJAX)
+        Auth::login($user);
+
+        // Create token for token-based auth (Postman/Mobile)
         $token = $user->createToken('auth_token')->plainTextToken;
-        $redirectUrl = $user->isAdmin()
-            ? route('admin.dashboard')
-            : route('user.dashboard');
+
         return response()->json([
             "status" => true,
             "message" => "Login successful",
             "token" => $token,
             "role" => $user->role,
-            "data" => $user,
-            "redirect_url"=> $redirectUrl
+            "data" => $user
         ]);
     }
 

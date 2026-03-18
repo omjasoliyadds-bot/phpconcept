@@ -17,6 +17,8 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request->all()); 
+        // exit;
         $validator = Validator::make($request->all(), [
             'document' => 'required|file|max:10240', // Max 10MB
             'folder_id' => 'nullable|exists:folders,id',

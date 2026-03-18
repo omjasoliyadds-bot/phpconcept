@@ -138,7 +138,11 @@
                                     timer: 1500
                                 }).then(() => {
                                     $('#userLogin')[0].reset();
-                                    window.location.href = response.redirect_url;
+                                    if (response.role == 'admin') {
+                                        window.location.href = "{{ route('admin.dashboard') }}";
+                                    }else {
+                                        window.location.href = "{{ route('user.dashboard') }}";
+                                    }
                                 });
                             } else {
                                 Swal.fire({
