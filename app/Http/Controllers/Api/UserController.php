@@ -89,10 +89,8 @@ class UserController extends Controller
             ]);
         }
 
-        // Login user for session-based auth (Web/AJAX)
         Auth::login($user);
 
-        // Create token for token-based auth (Postman/Mobile)
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

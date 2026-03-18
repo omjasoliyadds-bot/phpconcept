@@ -9,16 +9,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Folder;
+use App\Models\DocumentUserPermission;
 
 class DocumentController extends Controller
 {
-    /**
-     * Upload a new document (CREATE)
-     */
     public function store(Request $request)
     {
-        // dd($request->all()); 
-        // exit;
         $validator = Validator::make($request->all(), [
             'document' => 'required|file|max:10240', // Max 10MB
             'folder_id' => 'nullable|exists:folders,id',
@@ -28,7 +24,6 @@ class DocumentController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
 
-        // Additional check for folder_id ownership if provided
         $userId = auth()->id();
         $folderId = $request->folder_id;
 
@@ -63,8 +58,6 @@ class DocumentController extends Controller
 
         $extension = $file->getClientOriginalExtension();
 
-        // Store in 'local' storage (private by default)
-        // Path: storage/app/private/documents/{user_id}/{filename}
         $path = $file->store('documents/' . auth()->id(), 'local');
 
         $document = Document::create([
@@ -131,9 +124,6 @@ class DocumentController extends Controller
         ]);
     }
 
-    /**
-     * Delete a document (DELETE)
-     */
     public function destroy($id)
     {
         $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
@@ -151,9 +141,6 @@ class DocumentController extends Controller
         ]);
     }
 
-    /**
-     * Securely Download the file
-     */
     public function download($id)
     {
         $document = Document::where('id', $id)
@@ -180,7 +167,8 @@ class DocumentController extends Controller
         $validate = Validator::make($request->all(), [
             'user_ids' => 'required|array',
             'user_ids.*' => 'required|exists:users,id',
-            'permission' => 'required|in:view,edit,download'
+            'permission' => 'required|array',
+            'permission.*' => 'in:view,edit,download'
         ]);
 
         if ($validate->fails()) {
@@ -194,34 +182,81 @@ class DocumentController extends Controller
             ->where('user_id', auth()->id())
             ->firstOrFail();
 
-        // already shared users
-        $alreadyShared = $document->sharedUsers()
-            ->whereIn('users.id', $request->user_ids)
-            ->pluck('users.id')
-            ->toArray();
+        $alreadyShared = [];
 
-        $newUsers = array_diff($request->user_ids, $alreadyShared);
+        foreach ($request->user_ids as $userId) {
 
-        $syncData = [];
-        foreach ($newUsers as $user_id) {
-            $syncData[$user_id] = [
-                'permission' => $request->permission
+            foreach ($request->permission as $perm) {
+                $existingPerm = DocumentUserPermission::withTrashed()->where([
+                    'document_id' => $id,
+                    'user_id' => $userId,
+                    'permission' => $perm
+                ])->first();
+
+                if ($existingPerm) {
+                    if ($existingPerm->trashed()) {
+                        $existingPerm->restore();
+                    } else {
+                        $alreadyShared[] = $userId;
+                    }
+                } else {
+                    DocumentUserPermission::create([
+                        'document_id' => $id,
+                        'user_id' => $userId,
+                        'permission' => $perm
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => !empty($alreadyShared)
+                ? 'Shared successfully, but some permissions already existed'
+                : 'File shared successfully',
+            'already_shared_users' => array_unique($alreadyShared)
+        ]);
+    }
+    public function getPermissions($id)
+    {
+        $document = Document::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $permissions = DocumentUserPermission::where('document_id', $id)
+        ->with('user:id,name,email')->get()->groupBy('user_id');
+
+        $formattedPermissions = [];
+        foreach ($permissions as $userId => $userPerms) {
+            $formattedPermissions[] = [
+                'user' => $userPerms->first()->user,
+                'permissions' => $userPerms->pluck('permission')->toArray()
             ];
         }
 
-        if (!empty($syncData)) {
-            $document->sharedUsers()->syncWithoutDetaching($syncData);
-        }
-        if(count($alreadyShared) > 0){
-           return response()->json([
-               'status'=> false,
-               'message' => 'Some users already have access'
-           ]);
-        }
         return response()->json([
             'status' => true,
-            'message' => 'File shared successfully',
-            'already_shared_users' => $alreadyShared
+            'data' => $formattedPermissions
+        ]);
+    }
+    public function revokePermission(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => false, 'errors' => $validator->errors()]);
+        }
+        $document = Document::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+        DocumentUserPermission::where('document_id', $id)
+            ->where('user_id', $request->user_id)
+            ->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Access revoked successfully'
         ]);
     }
 }

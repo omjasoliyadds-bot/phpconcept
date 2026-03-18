@@ -207,18 +207,13 @@
     </div>
 </div>
 
-@include('user.partials.share-modal')
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
 
         $(document).ready(function () {
-            $('.select2').select2({
-                dropdownParent: $('#shareModal'),
-                width: '100%',
-                placeholder: '--Select Users--'
-            });
+
             loadFolderContents();
             function loadFolderContents() {
                 let folderId = "{{ $folder->id }}";
@@ -286,9 +281,10 @@
                                                             <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
                                                                 <i class="fa fa-download"></i>
                                                             </a>
-                                                            <button class="btn btn-sm btn-outline-primary shareDocBtn" data-id="${file.id}">
+                                                            <a href="/documents/${file.id}/manage-access" class="btn btn-sm btn-outline-primary">
                                                                 <i class="fa fa-share-alt"></i>
-                                                            </button>
+                                                            </a>
+
                                                             <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
@@ -472,59 +468,6 @@
                 });
             });
 
-            // Document Share Logic
-            $(document).on('click', '.shareDocBtn', function () {
-                let docId = $(this).data('id');
-                $('#share_document_id').val(docId);
-                $('#share_users').val(null).trigger('change');
-                $('#shareModal').modal('show');
-            });
-
-            $('#shareBtn').on('click', function () {
-                let docId = $('#share_document_id').val();
-                let userIds = $('#share_users').val();
-                let permission = $('#permission').val();
-
-                if (!userIds || userIds.length === 0) {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Please select at least one user.' });
-                    return;
-                }
-
-                $.ajax({
-                    url: "{{ route('documents.share', ':id') }}".replace(':id', docId),
-                    method: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        user_ids: userIds,
-                        permission: permission
-                    },
-                    success: function (response) {
-                        if (response.status) {
-                            $('#shareModal').modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Shared',
-                                text: response.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message
-                            });
-                        }
-                    },
-                    error: function (xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Something went wrong.'
-                        });
-                    }
-                });
-            });
         });
     </script>
 @endpush

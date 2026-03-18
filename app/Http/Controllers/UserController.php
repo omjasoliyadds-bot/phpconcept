@@ -39,5 +39,14 @@ class UserController extends Controller
         $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->get();
         return view('user.explorer.index', compact('users'));
     }
+    public function shareWithMeView(){
+        return view('user.explorer.share-me');
+    }
+    public function manageAccess($id)
+    {
+        $document = Document::where('user_id', auth()->id())->findOrFail($id);
+        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->get();
+        return view('user.explorer.manage-access', compact('document', 'users'));
+    }
 }
 

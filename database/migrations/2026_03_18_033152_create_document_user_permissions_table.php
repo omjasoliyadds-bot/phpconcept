@@ -14,9 +14,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('document_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('permission', ['view', 'edit', 'download'])->default('view');
-            $table->unique(['document_id', 'user_id']);
+            $table->enum('permission', ['view', 'edit', 'download']);
+            $table->unique(['document_id', 'user_id', 'permission']);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

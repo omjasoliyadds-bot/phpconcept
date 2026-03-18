@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PermissionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
@@ -55,6 +56,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
             Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
             Route::post('/{id}/share', [DocumentController::class, 'share'])->name('documents.share');
+            Route::get('/{id}/permissions', [DocumentController::class, 'getPermissions'])->name('documents.permissions');
+            Route::post('/{id}/revoke', [DocumentController::class, 'revokePermission'])->name('documents.revoke');
         });
+        Route::get('share',[PermissionController::class,'sharedWithMe'])->name('user.get.share.documents');
     });
 });

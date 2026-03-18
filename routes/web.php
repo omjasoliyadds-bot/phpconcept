@@ -30,4 +30,6 @@ Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('/folders', [UserController::class, 'userFolders'])->name('folders.index');
     Route::get('/folders/{id}/files', [UserController::class, 'folderFiles'])->name('folders.show');
     Route::get('/explorer', [UserController::class, 'explorerView'])->name('explorer.index');
+    Route::get('share', [UserController::class,'shareWithMeView'])->name('user.share-with-me');
+    Route::get('/documents/{id}/manage-access', [UserController::class, 'manageAccess'])->name('documents.manage-access');
 });

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\DocumentUserPermission;
 
 class Document extends Model
 {
@@ -32,7 +33,10 @@ class Document extends Model
     {
         return $this->belongsTo(Folder::class, 'folder_id');
     }
-
+    public function permissions()
+    {
+        return $this->hasMany(DocumentUserPermission::class);
+    }
     public function sharedUsers()
     {
         return $this->belongsToMany(User::class, 'document_user_permissions')
