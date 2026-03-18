@@ -2,18 +2,20 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\UserController;  
-use App\Http\Controllers\Api\FolderController;  
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\FolderController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\Admin\AdminController;
 
-// Public API Routes
-Route::post('register', [UserController::class, 'store'])->name('api.user.store');
-Route::post('login', [UserController::class, 'login'])->name('api.login.user');
+// Public API Routes (Throttled)
+Route::middleware(['throttle:6,1'])->group(function () {
+    Route::post('register', [UserController::class, 'store'])->name('api.user.store');
+    Route::post('login', [UserController::class, 'login'])->name('api.login.user');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::post('reset', [ForgotPasswordController::class, 'reset'])->name('api.password.reset');
+});
 Route::get('activate-account/{token}', [UserController::class, 'activateAccount'])->name('activate.account');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::post('reset', [ForgotPasswordController::class, 'reset'])->name('api.password.reset');
 
 // Protected API Routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -52,7 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
             Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
             Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
-            Route::post('/{id}/share', [DocumentController::class,'share'])->name('documents.share');
+            Route::post('/{id}/share', [DocumentController::class, 'share'])->name('documents.share');
         });
     });
 });

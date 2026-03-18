@@ -305,23 +305,32 @@
             }
 
             // Folder Creation
-            $('#createFolderForm').on('submit', function (e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "{{ route('api.folders.store') }}",
-                    method: "POST",
-                    data: new FormData(this),
-                    contentType: false,
-                    processData: false,
-                    success: function (response) {
-                        if (response.status) {
-                            $('#folderModal').modal('hide');
-                            $('#createFolderForm')[0].reset();
-                            Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-                            loadExplorer();
+            $('#createFolderForm').validate({
+                rules: { name: { required: true, maxlength: 255 } },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
+                submitHandler: function (form) {
+                    $.ajax({
+                        url: "{{ route('api.folders.store') }}",
+                        method: "POST",
+                        data: new FormData(form),
+                        contentType: false,
+                        processData: false,
+                        success: function (response) {
+                            if (response.status) {
+                                $('#folderModal').modal('hide');
+                                form.reset();
+                                Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                                loadExplorer();
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
 
             // Folder Rename
@@ -331,22 +340,32 @@
                 $('#renameFolderModal').modal('show');
             });
 
-            $('#renameFolderForm').on('submit', function (e) {
-                e.preventDefault();
-                let id = $('#folder_id').val();
-                $.ajax({
-                    url: "{{ route('api.folders.update', ':id') }}".replace(':id', id),
-                    method: "PUT",
-                    data: $(this).serialize(),
-                    success: function (response) {
-                        if (response.status) {
-                            $('#renameFolderModal').modal('hide');
-                            Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
-                            loadExplorer();
+            $('#renameFolderForm').validate({
+                rules: { name: { required: true, maxlength: 255 } },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
+                submitHandler: function (form) {
+                    let id = $('#folder_id').val();
+                    $.ajax({
+                        url: "{{ route('api.folders.update', ':id') }}".replace(':id', id),
+                        method: "PUT",
+                        data: $(form).serialize(),
+                        success: function (response) {
+                            if (response.status) {
+                                $('#renameFolderModal').modal('hide');
+                                Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
+                                loadExplorer();
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
+            // (Remove the old 'submit' handler if it exists)
 
             // Folder Delete
             $(document).on('click', '.deleteFolderBtn', function () {
@@ -376,23 +395,32 @@
             });
 
             // File Upload
-            $('#uploadForm').on('submit', function (e) {
-                e.preventDefault();
-                $.ajax({
-                    url: "{{ route('api.documents.upload') }}",
-                    method: "POST",
-                    data: new FormData(this),
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        if (response.status) {
-                            $('#uploadModal').modal('hide');
-                            $('#uploadForm')[0].reset();
-                            Swal.fire({ icon: 'success', title: 'Uploaded', text: response.message, timer: 1500, showConfirmButton: false });
-                            loadExplorer();
+            $('#uploadForm').validate({
+                rules: { document: { required: true } },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
+                submitHandler: function (form) {
+                    $.ajax({
+                        url: "{{ route('api.documents.upload') }}",
+                        method: "POST",
+                        data: new FormData(form),
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.status) {
+                                $('#uploadModal').modal('hide');
+                                form.reset();
+                                Swal.fire({ icon: 'success', title: 'Uploaded', text: response.message, timer: 1500, showConfirmButton: false });
+                                loadExplorer();
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.document?.[0] || response.message });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
 
             // Document Rename
@@ -402,21 +430,30 @@
                 $('#renameDocModal').modal('show');
             });
 
-            $('#renameDocForm').on('submit', function (e) {
-                e.preventDefault();
-                let id = $('#doc_id').val();
-                $.ajax({
-                    url: "{{ route('api.documents.update', ':id') }}".replace(':id', id),
-                    method: "PUT",
-                    data: $(this).serialize(),
-                    success: function (response) {
-                        if (response.status) {
-                            $('#renameDocModal').modal('hide');
-                            Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
-                            loadExplorer();
+            $('#renameDocForm').validate({
+                rules: { name: { required: true, maxlength: 255 } },
+                errorElement: 'span',
+                errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
+                submitHandler: function (form) {
+                    let id = $('#doc_id').val();
+                    $.ajax({
+                        url: "{{ route('api.documents.update', ':id') }}".replace(':id', id),
+                        method: "PUT",
+                        data: $(form).serialize(),
+                        success: function (response) {
+                            if (response.status) {
+                                $('#renameDocModal').modal('hide');
+                                Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
+                                loadExplorer();
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
 
             // Document Share Logic

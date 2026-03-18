@@ -62,8 +62,8 @@ class DocumentController extends Controller
         $extension = $file->getClientOriginalExtension();
 
         // Store in 'local' storage (private by default)
-        // Path: storage/app/documents/{user_id}/{filename}
-        $path = $file->store('documents/' . auth()->id(), 'public');
+        // Path: storage/app/private/documents/{user_id}/{filename}
+        $path = $file->store('documents/' . auth()->id(), 'local');
 
         $document = Document::create([
             'user_id' => auth()->id(),
@@ -164,11 +164,11 @@ class DocumentController extends Controller
             })
             ->firstOrFail();
 
-        if (!Storage::disk('public')->exists($document->path)) {
+        if (!Storage::disk('local')->exists($document->path)) {
             abort(404, 'File not found on disk');
         }
 
-        return Storage::disk('public')->download(
+        return Storage::disk('local')->download(
             $document->path,
             $document->name
         );

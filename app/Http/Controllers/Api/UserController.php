@@ -20,9 +20,9 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "name" => "required",
+            "name" => "required|string|max:255",
             "email" => "required|email|unique:users",
-            "password" => "required|min:8",
+            "password" => "required|min:8|confirmed",
         ]);
 
         if ($validator->fails()) {
@@ -135,8 +135,8 @@ class UserController extends Controller
             ]);
         }
 
-        $user->name = $request->name;
-        $user->email = $request->email;
+        $user->name = trim($request->name);
+        $user->email = trim($request->email);
         $user->save();
 
         return response()->json([

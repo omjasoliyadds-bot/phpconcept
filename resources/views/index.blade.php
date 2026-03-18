@@ -68,8 +68,14 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control"
+                                <input type="password" name="password" id="password" class="form-control"
                                     placeholder="Enter password">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                <input type="password" name="password_confirmation" class="form-control"
+                                    placeholder="Confirm password">
                             </div>
 
                             <div class="d-grid">
@@ -111,6 +117,10 @@
                     password: {
                         required: true,
                         minlength: 8
+                    },
+                    password_confirmation: {
+                        required: true,
+                        equalTo: "#password"
                     }
                 },
                 messages: {
@@ -124,6 +134,10 @@
                     password: {
                         required: "Please enter your password",
                         minlength: "Password must be at least 8 characters"
+                    },
+                    password_confirmation: {
+                        required: "Please confirm your password",
+                        equalTo: "Passwords do not match"
                     }
                 },
                 errorElement: 'span',
@@ -148,12 +162,28 @@
                                     icon: 'success',
                                     title: response.message,
                                     showConfirmButton: false,
-                                    timer: 1500
+                                    timer: 2000
                                 }).then((result) => {
-                                    if (result.dismiss === Swal.DismissReason.timer) {
-                                        window.location.href = "{{ route('login') }}";
-                                    }
+                                    window.location.href = "{{ route('login') }}";
                                 })
+                            } else {
+                                if (response.errors) {
+                                    let errorMessages = '';
+                                    Object.values(response.errors).forEach(err => {
+                                        errorMessages += err[0] + '<br>';
+                                    });
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Validation Error',
+                                        html: errorMessages,
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message || 'Registration failed'
+                                    });
+                                }
                             }
                         },
                         error: function (xhr, status, error) {
