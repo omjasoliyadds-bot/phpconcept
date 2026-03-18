@@ -166,7 +166,7 @@ class DocumentController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'user_ids' => 'required|array',
-            'user_ids.*' => 'required|exists:users,id',
+            'user_ids.*' => 'required|exists:users,id,status,1',
             'permission' => 'required|array',
             'permission.*' => 'in:view,edit,download'
         ]);
