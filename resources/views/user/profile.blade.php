@@ -92,6 +92,10 @@
                     name: { required: true },
                     email: { required: true, email: true },
                 },
+                 errorPlacement: function (error, element) {
+                    error.addClass('text-danger small');
+                    error.insertAfter(element);
+                },
                 submitHandler: function (form) {
                     const btn = $(form).find('button[type="submit"]');
                     btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Updating...');

@@ -3,7 +3,7 @@
 @section('content')
 
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center align-items-md-center mb-4">
         <h4 class="fw-bold mb-0">File Explorer</h4>
         <div class="d-flex gap-2">
             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#folderModal">

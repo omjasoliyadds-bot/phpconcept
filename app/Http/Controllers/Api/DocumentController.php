@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Models\Folder;
 use App\Models\DocumentUserPermission;
+use App\Mail\DocumentSharedMail;
+use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 
 class DocumentController extends Controller
 {
@@ -77,10 +80,6 @@ class DocumentController extends Controller
             'document' => $document
         ]);
     }
-
-    /**
-     * Rename a document (UPDATE)
-     */
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -143,23 +142,23 @@ class DocumentController extends Controller
 
     public function download($id)
     {
-            $document = Document::where('id', $id)
-                ->where(function ($query) {
-                    $query->where('user_id', auth()->id())
-                        ->orWhere('is_public', true)
-                        ->orWhereHas('permissions', function ($q) {
-                            $q->where('user_id', auth()->id())
-                                ->where('permission', 'download');
-                        });
-                })
-                ->first();
+        $document = Document::where('id', $id)
+            ->where(function ($query) {
+                $query->where('user_id', auth()->id())
+                    ->orWhere('is_public', true)
+                    ->orWhereHas('permissions', function ($q) {
+                        $q->where('user_id', auth()->id())
+                            ->where('permission', 'download');
+                    });
+            })
+            ->first();
 
-            if (!$document) {
-                abort(403, 'Unauthorized access or document not found.');
-            }
-
-            return Storage::disk('public')->download($document->path, $document->name);
+        if (!$document) {
+            abort(403, 'Unauthorized access or document not found.');
         }
+
+        return Storage::disk('public')->download($document->path, $document->name);
+    }
     public function share(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
@@ -183,7 +182,7 @@ class DocumentController extends Controller
         $alreadyShared = [];
 
         foreach ($request->user_ids as $userId) {
-
+            $user = User::find($userId);
             foreach ($request->permission as $perm) {
                 $existingPerm = DocumentUserPermission::withTrashed()->where([
                     'document_id' => $id,
@@ -205,8 +204,9 @@ class DocumentController extends Controller
                     ]);
                 }
             }
-        }
 
+        }
+        Mail::to($user->email)->send(new DocumentSharedMail($document, auth()->user()));
         return response()->json([
             'status' => true,
             'message' => !empty($alreadyShared)
