@@ -54,11 +54,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/upload', [DocumentController::class, 'store'])->name('api.documents.upload');
             Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
             Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
-            Route::get('/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
             Route::post('/{id}/share', [DocumentController::class, 'share'])->name('documents.share');
             Route::get('/{id}/permissions', [DocumentController::class, 'getPermissions'])->name('documents.permissions');
             Route::post('/{id}/revoke', [DocumentController::class, 'revokePermission'])->name('documents.revoke');
         });
-        Route::get('share',[PermissionController::class,'sharedWithMe'])->name('user.get.share.documents');
+        Route::get('share', [PermissionController::class, 'sharedWithMe'])->name('user.get.share.documents');
     });
 });

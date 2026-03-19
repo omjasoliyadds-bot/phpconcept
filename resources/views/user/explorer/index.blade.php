@@ -244,6 +244,7 @@
                             month: 'short', day: '2-digit', year: 'numeric'
                         });
                         let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                        let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', file.id);
                         html += `
                             <tr>
                                 <td>
@@ -259,7 +260,7 @@
                                 <td>${size}</td>
                                 <td>${date}</td>
                                 <td class="text-end">
-                                    <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-primary">
+                                    <a href="${downloadUrl}" class="btn btn-sm btn-outline-primary">
                                         <i class="fa fa-download"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
@@ -308,14 +309,14 @@
                         contentType: false,
                         processData: false,
                         success: function (response) {
-                            if (response.status) {
-                                $('#folderModal').modal('hide');
-                                form.reset();
-                                Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-                                loadExplorer();
-                            } else {
-                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
-                            }
+                             if (response.status) {
+                                 $('#folderModal').modal('hide');
+                                 form.reset();
+                                 window.showSuccess(response.message);
+                                 loadExplorer();
+                             } else {
+                                 window.showErrors(response);
+                             }
                         }
                     });
                 }
@@ -342,13 +343,13 @@
                         method: "PUT",
                         data: $(form).serialize(),
                         success: function (response) {
-                            if (response.status) {
-                                $('#renameFolderModal').modal('hide');
-                                Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
-                                loadExplorer();
-                            } else {
-                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
-                            }
+                             if (response.status) {
+                                 $('#renameFolderModal').modal('hide');
+                                 window.showSuccess(response.message);
+                                 loadExplorer();
+                             } else {
+                                 window.showErrors(response);
+                             }
                         }
                     });
                 }
@@ -373,7 +374,7 @@
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
                                 if (response.status) {
-                                    Swal.fire('Deleted!', response.message, 'success');
+                                    window.showSuccess(response.message);
                                     loadExplorer();
                                 }
                             }
@@ -398,14 +399,14 @@
                         processData: false,
                         contentType: false,
                         success: function (response) {
-                            if (response.status) {
-                                $('#uploadModal').modal('hide');
-                                form.reset();
-                                Swal.fire({ icon: 'success', title: 'Uploaded', text: response.message, timer: 1500, showConfirmButton: false });
-                                loadExplorer();
-                            } else {
-                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.document?.[0] || response.message });
-                            }
+                             if (response.status) {
+                                 $('#uploadModal').modal('hide');
+                                 form.reset();
+                                 window.showSuccess(response.message);
+                                 loadExplorer();
+                             } else {
+                                 window.showErrors(response);
+                             }
                         }
                     });
                 }
@@ -432,13 +433,13 @@
                         method: "PUT",
                         data: $(form).serialize(),
                         success: function (response) {
-                            if (response.status) {
-                                $('#renameDocModal').modal('hide');
-                                Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
-                                loadExplorer();
-                            } else {
-                                Swal.fire({ icon: 'error', title: 'Error', text: response.errors?.name?.[0] || response.message });
-                            }
+                             if (response.status) {
+                                 $('#renameDocModal').modal('hide');
+                                 window.showSuccess(response.message);
+                                 loadExplorer();
+                             } else {
+                                 window.showErrors(response);
+                             }
                         }
                     });
                 }
@@ -463,7 +464,7 @@
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
                                 if (response.status) {
-                                    Swal.fire('Deleted!', response.message, 'success');
+                                    window.showSuccess(response.message);
                                     loadExplorer();
                                 }
                             }

@@ -150,23 +150,13 @@
                         permission: permission
                     },
                     success: function (response) {
-                        if (response.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Shared',
-                                text: response.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                            loadSharedUsers(docId);
-                            $('#share_users').val(null).trigger('change');
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message
-                            });
-                        }
+                         if (response.status) {
+                             window.showSuccess(response.message);
+                             loadSharedUsers(docId);
+                             $('#share_users').val(null).trigger('change');
+                         } else {
+                             window.showErrors(response);
+                         }
                     }
                 });
             });
@@ -237,10 +227,10 @@
                                 user_id: userId
                             },
                             success: function (response) {
-                                if (response.status) {
-                                    Swal.fire({ icon: 'success', title: 'Revoked', text: response.message, timer: 1500, showConfirmButton: false });
-                                    loadSharedUsers(docId);
-                                }
+                                 if (response.status) {
+                                     window.showSuccess(response.message);
+                                     loadSharedUsers(docId);
+                                 }
                             }
                         });
                     }

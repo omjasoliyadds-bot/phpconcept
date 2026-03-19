@@ -258,6 +258,7 @@
                                 response.files.forEach(file => {
                                     let date = new Date(file.created_at).toLocaleDateString();
                                     let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                                    let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', file.id);
                                     html += `
                                                     <tr>
                                                         <td class="ps-4">
@@ -278,7 +279,7 @@
                                                                     data-name="${file.name.split('.').slice(0, -1).join('.')}">
                                                                 <i class="fa fa-edit"></i>
                                                             </button>
-                                                            <a href="/api/documents/${file.id}/download" class="btn btn-sm btn-outline-success">
+                                                            <a href="${downloadUrl}" class="btn btn-sm btn-outline-success">
                                                                 <i class="fa fa-download"></i>
                                                             </a>
                                                             <a href="/documents/${file.id}/manage-access" class="btn btn-sm btn-outline-primary">
@@ -321,8 +322,10 @@
                         if (response.status) {
                             $('#folderModal').modal('hide');
                             $('#createFolderForm')[0].reset();
-                            Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                            window.showSuccess(response.message);
                             loadFolderContents();
+                        } else {
+                            window.showErrors(response);
                         }
                     }
                 });
@@ -341,8 +344,10 @@
                         if (response.status) {
                             $('#uploadModal').modal('hide');
                             $('#uploadForm')[0].reset();
-                            Swal.fire({ icon: 'success', title: 'Uploaded', text: response.message, timer: 1500, showConfirmButton: false });
+                            window.showSuccess(response.message);
                             loadFolderContents();
+                        } else {
+                            window.showErrors(response);
                         }
                     }
                 });
@@ -366,7 +371,7 @@
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
                                 if (response.status) {
-                                    Swal.fire('Deleted!', response.message, 'success');
+                                    window.showSuccess(response.message);
                                     loadFolderContents();
                                 }
                             }
@@ -393,7 +398,7 @@
                             data: { _token: "{{ csrf_token() }}" },
                             success: function (response) {
                                 if (response.status) {
-                                    Swal.fire('Deleted!', response.message, 'success');
+                                    window.showSuccess(response.message);
                                     loadFolderContents();
                                 }
                             }
@@ -416,20 +421,15 @@
                     method: "PUT",
                     data: formData,
                     success: function (response) {
-                        if (response.status) {
-                            $('#renameFolderModal').modal('hide');
-                            $('#currentFolderName').text(response.folder.name);
-                            $('.breadcrumb-item.active').text(response.folder.name);
-                            $('#renameCurrentFolderBtn').data('name', response.folder.name);
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: response.message,
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        }
+                             if (response.status) {
+                                 $('#renameFolderModal').modal('hide');
+                                 $('#currentFolderName').text(response.folder.name);
+                                 $('.breadcrumb-item.active').text(response.folder.name);
+                                 $('#renameCurrentFolderBtn').data('name', response.folder.name);
+                                 window.showSuccess(response.message);
+                             } else {
+                                 window.showErrors(response);
+                             }
                     }
                 });
             });
@@ -452,18 +452,13 @@
                     method: "PUT",
                     data: formData,
                     success: function (response) {
-                        if (response.status) {
-                            $('#renameDocModal').modal('hide');
-                            loadFolderContents();
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: response.message,
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        }
+                             if (response.status) {
+                                 $('#renameDocModal').modal('hide');
+                                 loadFolderContents();
+                                 window.showSuccess(response.message);
+                             } else {
+                                 window.showErrors(response);
+                             }
                     }
                 });
             });

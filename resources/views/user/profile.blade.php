@@ -102,19 +102,14 @@
                         data: $(form).serialize(),
                         success: function (response) {
                             if (response.status) {  
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then(() => {
-                                    location.reload();
-                                })
-                            } else {
-                                Swal.fire('Error', response.message || 'Something went wrong', 'error');
-                                btn.prop('disabled', false).html('Update');
-                            }
+                                 window.showSuccess(response.message);
+                                 setTimeout(() => {
+                                     location.reload();
+                                 }, 1000);
+                             } else {
+                                 window.showErrors(response);
+                                 btn.prop('disabled', false).html('Update');
+                             }
                         },
                         error: function (xhr) {
                             Swal.fire('Error', 'An error occurred. Please try again.', 'error');
@@ -148,28 +143,13 @@
                         data: $(form).serialize(),
                         success: function (response) {
                             if (response.status) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Success',
-                                    text: response.message,
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                }).then(() => {
-                                    form.reset();
-                                    btn.prop('disabled', false).html('<i class="fa fa-key me-2"></i> Update Password');
-                                });
-                            } else {
-                                let errorMsg = '';
-                                if (response.errors) {
-                                    Object.values(response.errors).forEach(err => {
-                                        errorMsg += err[0] + '<br>';
-                                    });
-                                } else if (response.message) {
-                                    errorMsg = response.message;
-                                }
-                                Swal.fire('Error', errorMsg || 'Validation failed', 'error');
-                                btn.prop('disabled', false).html('<i class="fa fa-key me-2"></i> Update Password');
-                            }
+                                 window.showSuccess(response.message);
+                                 form.reset();
+                                 btn.prop('disabled', false).html('<i class="fa fa-key me-2"></i> Update Password');
+                             } else {
+                                 window.showErrors(response);
+                                 btn.prop('disabled', false).html('<i class="fa fa-key me-2"></i> Update Password');
+                             }
                         },
                         error: function (xhr) {
                             Swal.fire('Error', 'An internal error occurred.', 'error');

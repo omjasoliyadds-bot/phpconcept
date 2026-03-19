@@ -27,7 +27,8 @@
                         response.data.forEach(function (doc) {
                             let permissions = doc.permissions?.map(p => p.permission) || [];
                             let permissionText = permissions.length ? permissions.join(', ') : 'N/A';
-                            html += `
+                                        let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', doc.id);
+                                        html += `
                             <div class="col-12 mb-3">
                                 <div class="card shadow-sm">
                                     <div class="card-body">
@@ -42,7 +43,7 @@
                                         <div>
                                         ${permissions.includes('view') ? `<button class="btn btn-sm btn-primary">View</button>` : ''}
                                         ${permissions.includes('edit') ? `<button class="btn btn-sm btn-warning">Edit</button>` : ''}
-                                        ${permissions.includes('download') ? `<button class="btn btn-sm btn-success">Download</button>` : ''}
+                                        ${permissions.includes('download') ? `<a href="${downloadUrl}" class="btn btn-sm btn-success">Download</a>` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -50,7 +51,16 @@
                         `;
                         });
                     } else {
-                        html = `<p class="text-center">No shared documents found</p>`;
+                        html = `<div class='col-12'>
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="fa fa-info-circle me-2"></i>
+                                            <strong>No documents Shared yet.</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
                     }
                     $('#allDocuments').html(html);
                 }

@@ -143,25 +143,23 @@ class DocumentController extends Controller
 
     public function download($id)
     {
-        $document = Document::where('id', $id)
-            ->where(function ($query) {
-                $query->where('user_id', auth()->id())
-                    ->orWhere('is_public', true)
-                    ->orWhereHas('sharedUsers', function ($q) {
-                        $q->where('users.id', auth()->id());
-                    });
-            })
-            ->firstOrFail();
+            $document = Document::where('id', $id)
+                ->where(function ($query) {
+                    $query->where('user_id', auth()->id())
+                        ->orWhere('is_public', true)
+                        ->orWhereHas('permissions', function ($q) {
+                            $q->where('user_id', auth()->id())
+                                ->where('permission', 'download');
+                        });
+                })
+                ->first();
 
-        if (!Storage::disk('local')->exists($document->path)) {
-            abort(404, 'File not found on disk');
+            if (!$document) {
+                abort(403, 'Unauthorized access or document not found.');
+            }
+
+            return Storage::disk('public')->download($document->path, $document->name);
         }
-
-        return Storage::disk('local')->download(
-            $document->path,
-            $document->name
-        );
-    }
     public function share(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
@@ -224,7 +222,7 @@ class DocumentController extends Controller
             ->firstOrFail();
 
         $permissions = DocumentUserPermission::where('document_id', $id)
-        ->with('user:id,name,email')->get()->groupBy('user_id');
+            ->with('user:id,name,email')->get()->groupBy('user_id');
 
         $formattedPermissions = [];
         foreach ($permissions as $userId => $userPerms) {

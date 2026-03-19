@@ -32,4 +32,5 @@ Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('/explorer', [UserController::class, 'explorerView'])->name('explorer.index');
     Route::get('share', [UserController::class,'shareWithMeView'])->name('user.share-with-me');
     Route::get('/documents/{id}/manage-access', [UserController::class, 'manageAccess'])->name('documents.manage-access');
+    Route::get('/documents/{id}/download', [App\Http\Controllers\Api\DocumentController::class, 'download'])->name('documents.download');
 });

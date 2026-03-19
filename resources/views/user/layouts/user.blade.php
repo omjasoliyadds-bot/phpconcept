@@ -55,6 +55,54 @@
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
         }
+
+        // Common SweetAlert Toast Configuration
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        // Global function to show success toast
+        window.showSuccess = function(message) {
+            Toast.fire({
+                icon: 'success',
+                title: message || 'Success'
+            });
+        };
+
+        // Global function to show error toast (handles validation errors too)
+        window.showErrors = function(response) {
+            let errorMsg = '';
+            if (response.errors) {
+                // Laravel validation errors object
+                Object.keys(response.errors).forEach(key => {
+                    if (Array.isArray(response.errors[key])) {
+                        response.errors[key].forEach(message => {
+                            errorMsg += `<div class="text-start small mb-1">${message}</div>`;
+                        });
+                    } else {
+                        errorMsg += `<div class="text-start small mb-1">${response.errors[key]}</div>`;
+                    }
+                });
+            } else if (response.message) {
+                errorMsg = response.message;
+            } else {
+                errorMsg = 'Operation failed. Please try again.';
+            }
+
+            Toast.fire({
+                icon: 'error',
+                title: 'Error',
+                html: errorMsg
+            });
+        };
     </script>
 </body>
 
