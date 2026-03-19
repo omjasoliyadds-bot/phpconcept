@@ -150,8 +150,7 @@ class DocumentController extends Controller
                         $q->where('user_id', auth()->id())
                             ->where('permission', 'download');
                     });
-            })
-            ->first();
+            });
 
         if (!$document) {
             abort(403, 'Unauthorized access or document not found.');
@@ -161,6 +160,13 @@ class DocumentController extends Controller
     }
     public function share(Request $request, $id)
     {
+        if (!auth()->user()->can_share) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Your sharing capability has been disabled by an administrator.'
+            ], 403);
+        }
+
         $validate = Validator::make($request->all(), [
             'user_ids' => 'required|array',
             'user_ids.*' => 'required|exists:users,id,status,1',
@@ -182,7 +188,10 @@ class DocumentController extends Controller
         $alreadyShared = [];
 
         foreach ($request->user_ids as $userId) {
-            $user = User::find($userId);
+            $user = User::where('id', $userId)->where('status', 1)->first();
+            if (!$user) {
+                continue;
+            }
             foreach ($request->permission as $perm) {
                 $existingPerm = DocumentUserPermission::withTrashed()->where([
                     'document_id' => $id,
@@ -205,8 +214,10 @@ class DocumentController extends Controller
                 }
             }
 
+            Mail::to($user->email)->send(
+                new DocumentSharedMail($document, auth()->user())
+            );
         }
-        Mail::to($user->email)->send(new DocumentSharedMail($document, auth()->user()));
         return response()->json([
             'status' => true,
             'message' => !empty($alreadyShared)

@@ -27,7 +27,8 @@
                     alt="Profile">
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="far fa-user me-2"></i> My Profile</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="far fa-user me-2"></i> My
+                        Profile</a></li>
                 <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                 <li>
                     <hr class="dropdown-divider">
@@ -45,7 +46,6 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
-            console.log('Logout script loaded');
             $('.logout-btn').on('click', function (e) {
                 console.log('Logout button clicked');
                 e.preventDefault();

@@ -21,6 +21,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('users', [AdminController::class, 'usersView'])->name('admin.users.view');
     Route::get('profile', [AdminController::class, 'profile'])->name('admin.profile');
+    Route::get('document', [AdminController::class, 'documentsView'])->name('admin.documents.view');
+    Route::get('/documents/{id}/manage-access', [AdminController::class, 'manageAccess'])->name('admin.documents.manage-access');
 });
 
 // User View Routes

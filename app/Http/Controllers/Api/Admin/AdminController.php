@@ -32,25 +32,32 @@ class AdminController extends Controller
     public function getUsers(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select(['id', 'name', 'email', 'status'])->where('role', 'user');
+            $users = User::select(['id', 'name', 'email', 'status', 'can_share'])->where('role', 'user');
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('status', function ($user) {
                     $checked = $user->status ? 'checked' : '';
                     return '
                         <div class="form-check form-switch">
-                        <input class="form-check-input toggle-status"
-                        type="checkbox"
-                            data-id="' . $user->id . '"
-                        ' . $checked . '>
-                        <span class="badge ' . ($user->status ? 'bg-success' : 'bg-danger') . ' px-3 py-2">
-                            ' . ($user->status ? 'Activated' : 'Deactivated') . '
-                        </span>
+                            <input class="form-check-input toggle-status" type="checkbox" data-id="' . $user->id . '" ' . $checked . '>
+                            <span class="badge ' . ($user->status ? 'bg-success' : 'bg-danger') . ' px-2 py-1">
+                                ' . ($user->status ? 'Active' : 'Inactive') . '
+                            </span>
                         </div>
-    ';
+                    ';
                 })
-
-                ->rawColumns(['status'])
+                ->addColumn('can_share', function ($user) {
+                    $checked = $user->can_share ? 'checked' : '';
+                    return '
+                        <div class="form-check form-switch">
+                            <input class="form-check-input toggle-sharing" type="checkbox" data-id="' . $user->id . '" ' . $checked . '>
+                            <span class="badge ' . ($user->can_share ? 'bg-primary' : 'bg-warning') . ' px-2 py-1">
+                                ' . ($user->can_share ? 'Allowed' : 'Restricted') . '
+                            </span>
+                        </div>
+                    ';
+                })
+                ->rawColumns(['status', 'can_share'])
                 ->make(true);
         }
     }
@@ -64,6 +71,18 @@ class AdminController extends Controller
         return response()->json([
             'status' => true,
             'message' => "User account {$statusLabel} successfully"
+        ]);
+    }
+    public function toggleSharing(Request $request)
+    {
+        $user = User::findOrFail($request->id);
+        $user->can_share = $user->can_share ? 0 : 1;
+        $user->save();
+
+        $statusLabel = $user->can_share ? 'enabled' : 'disabled';
+        return response()->json([
+            'status' => true,
+            'message' => "Sharing capability {$statusLabel} for user successfully"
         ]);
     }
     public function updateProfile(Request $request, $id)

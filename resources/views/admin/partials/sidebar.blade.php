@@ -23,9 +23,9 @@
         <p class="menu-label">Files & Storage</p>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{ route('admin.documents.view') }}" class="nav-link">
                     <i class="fas fa-folder"></i>
-                    <span>All Folders</span>
+                    <span>All Documents</span>
                 </a>
             </li>
             <li class="nav-item">

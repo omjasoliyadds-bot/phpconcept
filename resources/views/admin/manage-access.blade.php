@@ -1,4 +1,6 @@
-@extends('user.layouts.user')
+@extends('admin.layouts.admin')
+
+@section('title', 'Manage Access')
 
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -18,15 +20,15 @@
     <div class="container-fluid py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-0">Manage Access</h4>
+                <h4 class="fw-bold mb-0">Admin Access Control Override</h4>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="{{ route('explorer.index') }}">Explorer</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.documents.view') }}">Documents</a></li>
                         <li class="breadcrumb-item active">Manage Access: {{ $document->name }}</li>
                     </ol>
                 </nav>
             </div>
-            <a href="{{route('explorer.index')}}" class="btn btn-light shadow-sm">
+            <a href="{{ route('admin.documents.view') }}" class="btn btn-light shadow-sm">
                 <i class="fa fa-arrow-left me-2"></i> Back
             </a>
         </div>
@@ -35,7 +37,7 @@
             <div class="col-lg-5">
                 <div class="card card-sharing border-0 p-4 mb-4">
                     <h5 class="fw-bold mb-4 text-primary">
-                        <i class="fa fa-user-plus me-2"></i> Grant New Access
+                        <i class="fa fa-user-shield me-2"></i> Grant Manual Access
                     </h5>
                     <form id="shareForm">
                         @csrf
@@ -60,19 +62,20 @@
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" id="shareBtn">
-                            Share Access
+                            Update Permissions
                         </button>
                     </form>
                 </div>
 
                 <div class="card card-sharing border-0 p-4">
-                    <h5 class="fw-bold mb-3">File Summary</h5>
+                    <h5 class="fw-bold mb-3">File Information</h5>
                     <div class="d-flex align-items-center p-3 bg-light rounded-3">
                         <div class="me-3 fs-3 text-info">
                             <i class="fa {{ $document->icon }}"></i>
                         </div>
                         <div>
                             <div class="fw-bold text-truncate" style="max-width: 250px;">{{ $document->name }}</div>
+                            <div class="small text-muted">Owned by: <strong>{{ $document->user->name }}</strong></div>
                             <div class="small text-muted">{{ number_format($document->size / 1024 / 1024, 2) }} MB • Created
                                 {{ $document->created_at->format('M d, Y') }}</div>
                         </div>
@@ -83,7 +86,7 @@
             <div class="col-lg-7">
                 <div class="card card-sharing border-0 p-4">
                     <h5 class="fw-bold mb-4">
-                        <i class="fa fa-users text-info me-2"></i> Users with Access
+                        <i class="fa fa-users text-info me-2"></i> Current Access List
                     </h5>
                     <div id="sharedUsersList">
                         <div class="text-center py-5">
@@ -98,8 +101,8 @@
     </div>
 @endsection
 
-@push('scripts')
-
+@section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function () {
             $('.select2').select2({
@@ -142,7 +145,7 @@
                 }
 
                 $.ajax({
-                    url: "{{ route('documents.share', ':id') }}".replace(':id', docId),
+                    url: "{{ route('admin.documents.share', ':id') }}".replace(':id', docId),
                     method: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
@@ -151,32 +154,22 @@
                     },
                     success: function (response) {
                          if (response.status) {
-                             window.showSuccess(response.message);
+                             Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
                              loadSharedUsers(docId);
                              $('#share_users').val(null).trigger('change');
                          } else {
-                             window.showErrors(response);
-                         }
-                    },
-                    error: function (xhr) {
-                        let res = xhr.responseJSON;
-
-                        if (res && res.message) {
-                            Swal.fire({
-                                toast:true,
-                                position: 'top-end',
-                                icon: 'error',
-                                title: 'Access Denied',
-                                text: res.message,
-                                showConfirmButton: false,
-                                showCancelButton: false,
-                                timer: 3000
-                            });
-                        } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: 'Something went wrong.'
+                                text: 'Failed to update permissions'
                             });
                          }
                     }
@@ -185,7 +178,7 @@
 
             function loadSharedUsers(docId) {
                 $.ajax({
-                    url: "{{ route('documents.permissions', ':id') }}".replace(':id', docId),
+                    url: "{{ route('admin.documents.permissions', ':id') }}".replace(':id', docId),
                     method: "GET",
                     success: function (response) {
                         let html = '';
@@ -203,9 +196,9 @@
                                                     <div class="small text-muted">${item.user.email}</div>
                                                     <div class="mt-2">
                                                         ${item.permissions.map(p => {
-                                    let badgeClass = p === 'edit' ? 'bg-warning' : (p === 'download' ? 'bg-success' : 'bg-info');
-                                    return `<span class="badge ${badgeClass} text-white me-1 text-capitalize">${p}</span>`;
-                                }).join('')}
+                                                            let badgeClass = p === 'edit' ? 'bg-warning' : (p === 'download' ? 'bg-success' : 'bg-info');
+                                                            return `<span class="badge ${badgeClass} text-white me-1 text-capitalize">${p}</span>`;
+                                                        }).join('')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -220,7 +213,7 @@
                             html = `
                                     <div class="text-center py-5">
                                         <i class="fa fa-user-shield text-muted fs-1 mb-3 opacity-25"></i>
-                                        <p class="text-muted">This file is not shared with anyone yet.</p>
+                                        <p class="text-muted">No specific users have access to this file yet.</p>
                                     </div>
                                 `;
                         }
@@ -242,7 +235,7 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: "{{ route('documents.revoke', ':id') }}".replace(':id', docId),
+                            url: "{{ route('admin.documents.revoke_permission', ':id') }}".replace(':id', docId),
                             method: "POST",
                             data: {
                                 _token: "{{ csrf_token() }}",
@@ -250,7 +243,15 @@
                             },
                             success: function (response) {
                                  if (response.status) {
-                                     window.showSuccess(response.message);
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: response.message,
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
                                      loadSharedUsers(docId);
                                  }
                             }
@@ -278,4 +279,4 @@
             transition: all 0.3s ease;
         }
     </style>
-@endpush
+@endsection

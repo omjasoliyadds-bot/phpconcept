@@ -37,7 +37,7 @@
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Status</th>
-                                {{-- <th class="text-center">Action</th> --}}
+                                <th>Sharing</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -61,6 +61,7 @@
                     { data: 'name', name: 'name' },
                     { data: 'email', name: 'email' },
                     { data: 'status', name: 'status' },
+                    { data: 'can_share', name: 'can_share' },
                 ]
             });
 
@@ -87,7 +88,42 @@
                                 showConfirmButton: false,
                                 timer: 3000
                             });
-                            table.ajax.reload();
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong!'
+                        });
+                    }
+                });
+            });
+
+            $(document).on('change', '.toggle-sharing', function () {
+                let id = $(this).data('id');
+                
+                $.ajax({
+                    url: "{{ route('admin.users.toggle_sharing') }}",
+                    method: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        id: id
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000
+                            });
+                            table.ajax.reload(null, false);
                         }
                     },
                     error: function (xhr) {

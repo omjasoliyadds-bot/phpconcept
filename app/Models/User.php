@@ -54,6 +54,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    protected $casts = [
+        'can_share' => 'boolean',
+    ];
 
     /**
      * Get the attributes that should be cast.
