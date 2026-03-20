@@ -38,27 +38,27 @@ class UserController extends Controller
                         </div>
                     ';
                 })
-                ->addColumn('storage', function ($user) {
-                    $used = $user->used_storage ?? 0;
-                    $limit = $user->storage_limit;
-                    $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
-                    $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
+                // ->addColumn('storage', function ($user) {
+                //     $used = $user->used_storage ?? 0;
+                //     $limit = $user->storage_limit;
+                //     $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
+                //     $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
 
-                    return '
-                        <div class="d-flex flex-column" style="min-width: 150px;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small>' . formatBytes($used) . ' / ' . formatBytes($limit) . '</small>
-                                <small class="fw-bold">' . round($percentage) . '%</small>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar ' . $colorClass . '" role="progressbar" style="width: ' . $percentage . '%;"></div>
-                            </div>
-                            <button class="btn btn-sm btn-link p-0 text-start mt-1 edit-storage" data-id="' . $user->id . '" data-limit="' . $user->storage_limit . '">
-                                <i class="fa fa-edit"></i> Edit Limit
-                            </button>
-                        </div>
-                    ';
-                })
+                //     return '
+                //         <div class="d-flex flex-column" style="min-width: 150px;">
+                //             <div class="d-flex justify-content-between mb-1">
+                //                 <small>' . formatBytes($used) . ' / ' . formatBytes($limit) . '</small>
+                //                 <small class="fw-bold">' . round($percentage) . '%</small>
+                //             </div>
+                //             <div class="progress" style="height: 6px;">
+                //                 <div class="progress-bar ' . $colorClass . '" role="progressbar" style="width: ' . $percentage . '%;"></div>
+                //             </div>
+                //             <button class="btn btn-sm btn-link p-0 text-start mt-1 edit-storage" data-id="' . $user->id . '" data-limit="' . $user->storage_limit . '">
+                //                 <i class="fa fa-edit"></i> Edit Limit
+                //             </button>
+                //         </div>
+                //     ';
+                // })
                 ->rawColumns(['status', 'can_share', 'storage'])
                 ->make(true);
         }

@@ -12,7 +12,7 @@
     <div class="row g-4">
 
         <!-- Storage Usage -->
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card dashboard-card border-0 shadow-sm">
                 <div class="card-body d-flex align-items-center">
                     <div class="icon-box bg-info text-white">
