@@ -246,4 +246,22 @@ class DocumentController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Access revoked successfully']);
     }
+
+    public function sharedWithMe()
+    {
+        $userId = auth()->id();
+
+        $documents = Document::whereHas('permissions', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+        ->with(['user', 'permissions' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        }])
+        ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $documents
+        ]);
+    }
 }

@@ -35,7 +35,7 @@
             height: 45px;
             font-weight: 500;
         }
-        
+
         @media(max-width:576px) {
             .card {
                 margin: 15px;
@@ -75,7 +75,7 @@
 
                             <div class="d-grid">
                                 <button class="btn btn-primary">
-                                <i class="fa fa-paper-plane mx-3"></i>Send Reset Link</button>
+                                    <i class="fa fa-paper-plane mx-3"></i>Send Reset Link</button>
                             </div>
                         </form>
                     </div>
@@ -93,10 +93,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
-            $(document).on('submit','#resetLinkForm', function (e) {
+            $(document).on('submit', '#resetLinkForm', function (e) {
                 e.preventDefault();
                 let formData = new FormData(this);
-                $.ajax({ 
+                $.ajax({
                     url: "{{ route('password.email') }}",
                     method: "POST",
                     data: formData,
@@ -109,13 +109,17 @@
                         }
                     },
                     error: function (xhr) {
-                        Swal.fire(
-                            icon:'error', 
-                            title: 'Error', 
-                            text: xhr.responseJSON.message,
+                        let errorMsg = xhr.responseJSON?.message || 'Something went wrong';
+                        if (xhr.responseJSON?.errors) {
+                            errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMsg,
                             timer: 1500,
                             showConfirmButton: false
-                        );
+                        });
                     }
                 });
             })

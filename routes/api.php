@@ -3,9 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\Auth\AuthController;
-use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\Auth\ForgotPasswordController;
 
 use App\Http\Controllers\Api\User\UserController;
 use App\Http\Controllers\Api\User\FolderController;
@@ -72,6 +71,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/{id}/revoke', [DocumentController::class, 'revokePermission'])->name('documents.revoke');
         });
         
-        Route::get('share', [PermissionController::class, 'sharedWithMe'])->name('user.get.share.documents');
+        Route::get('share', [DocumentController::class, 'sharedWithMe'])->name('user.get.share.documents');
     });
 });

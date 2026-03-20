@@ -12,7 +12,7 @@ Route::middleware(['guest'])->group(function () {
     Route::get('/', function () {
         return view('index');
     });
-    
+
     Route::get('login', [AuthController::class, 'loginView'])->name('login');
     Route::get('forgot-password', [AuthController::class, 'showLinkRequestForm'])->name('auth.reset-password');
     Route::get('reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
@@ -36,5 +36,5 @@ Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('/explorer', [UserController::class, 'explorer'])->name('explorer.index');
     Route::get('share', [UserController::class, 'sharedWithMe'])->name('user.share-with-me');
     Route::get('/documents/{id}/manage-access', [UserController::class, 'manageAccess'])->name('documents.manage-access');
-    Route::get('/documents/{id}/download', [App\Http\Controllers\Api\DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{id}/download', [App\Http\Controllers\Api\User\DocumentController::class, 'download'])->name('documents.download');
 });
