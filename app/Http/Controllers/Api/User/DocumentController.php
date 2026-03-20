@@ -101,7 +101,14 @@ class DocumentController extends Controller
         }
 
         $userId = auth()->id();
-        $document = Document::where('id', $id)->where('user_id', $userId)->firstOrFail();
+        $document = Document::where('id', $id)
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('permissions', function ($q) use ($userId) {
+                        $q->where('user_id', $userId)
+                            ->where('permission', 'edit');
+                    });
+            })->firstOrFail();
 
         $newName = $request->name;
         if (!Str::endsWith($newName, '.' . $document->extension)) {
