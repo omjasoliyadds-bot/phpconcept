@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -19,7 +19,7 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'document' => 'required|file|max:10240', // Max 10MB
+            'document' => 'required|file|max:10240',
             'folder_id' => 'nullable|exists:folders,id',
         ]);
 
@@ -31,10 +31,7 @@ class DocumentController extends Controller
         $folderId = $request->folder_id;
 
         if ($folderId) {
-            $folder = Folder::where('id', $folderId)
-                ->where('user_id', $userId)
-                ->first();
-
+            $folder = Folder::where('id', $folderId)->where('user_id', $userId)->first();
             if (!$folder) {
                 return response()->json([
                     'status' => false,
@@ -46,7 +43,6 @@ class DocumentController extends Controller
         $file = $request->file('document');
         $originalName = $file->getClientOriginalName();
 
-        // Check for duplicate file name in the same folder
         $duplicate = Document::where('user_id', $userId)
             ->where('name', $originalName)
             ->where('folder_id', $folderId)
@@ -60,7 +56,6 @@ class DocumentController extends Controller
         }
 
         $extension = $file->getClientOriginalExtension();
-
         $path = $file->store('documents/' . auth()->id(), 'local');
 
         $document = Document::create([
@@ -80,6 +75,7 @@ class DocumentController extends Controller
             'document' => $document
         ]);
     }
+
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -93,13 +89,11 @@ class DocumentController extends Controller
         $userId = auth()->id();
         $document = Document::where('id', $id)->where('user_id', $userId)->firstOrFail();
 
-        // Ensure extension stays the same
         $newName = $request->name;
         if (!Str::endsWith($newName, '.' . $document->extension)) {
             $newName .= '.' . $document->extension;
         }
 
-        // Check for duplicate file name (excluding current document) in the same folder
         $duplicate = Document::where('user_id', $userId)
             ->where('name', $newName)
             ->where('folder_id', $document->folder_id)
@@ -127,7 +121,6 @@ class DocumentController extends Controller
     {
         $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        // Delete from physical storage
         if (Storage::exists($document->path)) {
             Storage::delete($document->path);
         }
@@ -150,7 +143,7 @@ class DocumentController extends Controller
                         $q->where('user_id', auth()->id())
                             ->where('permission', 'download');
                     });
-            });
+            })->first();
 
         if (!$document) {
             abort(403, 'Unauthorized access or document not found.');
@@ -158,6 +151,7 @@ class DocumentController extends Controller
 
         return Storage::disk('public')->download($document->path, $document->name);
     }
+
     public function share(Request $request, $id)
     {
         if (!auth()->user()->can_share) {
@@ -181,17 +175,12 @@ class DocumentController extends Controller
             ]);
         }
 
-        $document = Document::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
+        $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         $alreadyShared = [];
 
         foreach ($request->user_ids as $userId) {
             $user = User::where('id', $userId)->where('status', 1)->first();
-            if (!$user) {
-                continue;
-            }
+            if (!$user) continue;
             foreach ($request->permission as $perm) {
                 $existingPerm = DocumentUserPermission::withTrashed()->where([
                     'document_id' => $id,
@@ -214,10 +203,9 @@ class DocumentController extends Controller
                 }
             }
 
-            Mail::to($user->email)->send(
-                new DocumentSharedMail($document, auth()->user())
-            );
+            Mail::to($user->email)->send(new DocumentSharedMail($document, auth()->user()));
         }
+
         return response()->json([
             'status' => true,
             'message' => !empty($alreadyShared)
@@ -226,14 +214,11 @@ class DocumentController extends Controller
             'already_shared_users' => array_unique($alreadyShared)
         ]);
     }
+
     public function getPermissions($id)
     {
-        $document = Document::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        $permissions = DocumentUserPermission::where('document_id', $id)
-            ->with('user:id,name,email')->get()->groupBy('user_id');
+        $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $permissions = DocumentUserPermission::where('document_id', $id)->with('user:id,name,email')->get()->groupBy('user_id');
 
         $formattedPermissions = [];
         foreach ($permissions as $userId => $userPerms) {
@@ -243,11 +228,9 @@ class DocumentController extends Controller
             ];
         }
 
-        return response()->json([
-            'status' => true,
-            'data' => $formattedPermissions
-        ]);
+        return response()->json(['status' => true, 'data' => $formattedPermissions]);
     }
+
     public function revokePermission(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -257,15 +240,10 @@ class DocumentController extends Controller
         if ($validator->fails()) {
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
-        $document = Document::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-        DocumentUserPermission::where('document_id', $id)
-            ->where('user_id', $request->user_id)
-            ->delete();
-        return response()->json([
-            'status' => true,
-            'message' => 'Access revoked successfully'
-        ]);
+
+        Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        DocumentUserPermission::where('document_id', $id)->where('user_id', $request->user_id)->delete();
+
+        return response()->json(['status' => true, 'message' => 'Access revoked successfully']);
     }
 }

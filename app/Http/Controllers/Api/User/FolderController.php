@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,8 +12,6 @@ class FolderController extends Controller
 {
     public function folderCreate(Request $request)
     {
-        // dd($request->all());
-        // exit;
         $validator = Validator::make($request->all(), [
             "name" => "required|string|max:255",
             "parent_id" => "nullable|exists:folders,id",
@@ -29,12 +27,8 @@ class FolderController extends Controller
         $userId = auth()->id();
         $parentId = $request->parent_id;
 
-        // Additional check for parent_id ownership if provided
         if ($parentId) {
-            $parentFolder = Folder::where('id', $parentId)
-                ->where('user_id', $userId)
-                ->first();
-
+            $parentFolder = Folder::where('id', $parentId)->where('user_id', $userId)->first();
             if (!$parentFolder) {
                 return response()->json([
                     "status" => false,
@@ -43,12 +37,7 @@ class FolderController extends Controller
             }
         }
 
-        // Check for duplicate folder name in the same parent
-        $duplicate = Folder::where('user_id', $userId)
-            ->where('name', $request->name)
-            ->where('parent_id', $parentId)
-            ->exists();
-
+        $duplicate = Folder::where('user_id', $userId)->where('name', $request->name)->where('parent_id', $parentId)->exists();
         if ($duplicate) {
             return response()->json([
                 "status" => false,
@@ -83,10 +72,7 @@ class FolderController extends Controller
 
     public function removeFolder($id)
     {
-        $folder = Folder::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->first();
-
+        $folder = Folder::where('id', $id)->where('user_id', auth()->id())->first();
         if (!$folder) {
             return response()->json([
                 "status" => false,
@@ -95,20 +81,13 @@ class FolderController extends Controller
         }
 
         $folder->delete();
-
-        return response()->json([
-            "status" => true,
-            "message" => "Folder deleted successfully"
-        ]);
+        return response()->json(["status" => true, "message" => "Folder deleted successfully"]);
     }
+
     public function folderFiles($id)
     {
         $userId = auth()->id();
-
-        $folder = Folder::where('id', $id)
-            ->where('user_id', $userId)
-            ->with(['files', 'subfolders'])
-            ->firstOrFail();
+        $folder = Folder::where('id', $id)->where('user_id', $userId)->with(['files', 'subfolders'])->firstOrFail();
 
         return response()->json([
             "status" => true,
@@ -126,31 +105,17 @@ class FolderController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                "status" => false,
-                "errors" => $validator->errors(),
-            ]);
+            return response()->json(["status" => false, "errors" => $validator->errors()]);
         }
 
         $userId = auth()->id();
-        $folder = Folder::where('id', $id)
-            ->where('user_id', $userId)
-            ->first();
+        $folder = Folder::where('id', $id)->where('user_id', $userId)->first();
 
         if (!$folder) {
-            return response()->json([
-                "status" => false,
-                "message" => "Folder not found",
-            ], 404);
+            return response()->json(["status" => false, "message" => "Folder not found"], 404);
         }
 
-        // Check for duplicate folder name (excluding current folder)
-        $duplicate = Folder::where('user_id', $userId)
-            ->where('name', $request->name)
-            ->where('parent_id', $folder->parent_id)
-            ->where('id', '!=', $id)
-            ->exists();
-
+        $duplicate = Folder::where('user_id', $userId)->where('name', $request->name)->where('parent_id', $folder->parent_id)->where('id', '!=', $id)->exists();
         if ($duplicate) {
             return response()->json([
                 "status" => false,
@@ -171,13 +136,8 @@ class FolderController extends Controller
     public function getExplorerData()
     {
         $user_id = auth()->id();
-        // Return root folders and root files
         $folders = Folder::where('user_id', $user_id)->whereNull('parent_id')->get();
-        $files = Document::where('user_id', $user_id)
-            ->whereNull('folder_id')
-            ->get();
-
-        // Also return all folders for sidebar/navigation if needed
+        $files = Document::where('user_id', $user_id)->whereNull('folder_id')->get();
         $allFolders = Folder::where('user_id', $user_id)->get();
         return response()->json([
             "status" => true,
@@ -187,4 +147,3 @@ class FolderController extends Controller
         ]);
     }
 }
-

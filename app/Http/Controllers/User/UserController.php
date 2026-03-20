@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
+
+use App\Http\Controllers\Controller;
 use App\Models\Document;
 use Carbon\Carbon;
 use App\Models\Folder;
 use Illuminate\Http\Request;
 use App\Models\User;
+
 class UserController extends Controller
 {
-    public function loginView()
-    {
-        return view('login');
-    }
-    public function userDashboardView()
+    public function dashboard()
     {
         $user_id = auth()->id();
         $documentTotal = Document::where('user_id', $user_id)->count();
@@ -20,28 +19,35 @@ class UserController extends Controller
         $uploadToday = Document::where('user_id', $user_id)->where('created_at', '>=', Carbon::today())->count();
         return view('user.dashboard', compact('documentTotal', 'uploadToday', 'totalFolder'));
     }
-    public function userProfile()
+
+    public function profile()
     {
         return view('user.profile');
     }
-    public function userFolders()
+
+    public function folders()
     {
         return view('user.folders.index');
     }
+
     public function folderFiles($id)
     {
         $folder = Folder::where('user_id', auth()->id())->findOrFail($id);
         $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->where('status', 1)->get();
         return view('user.folders.files', compact('folder', 'users'));
     }
-    public function explorerView()
+
+    public function explorer()
     {
         $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->where('status', 1)->get();
         return view('user.explorer.index', compact('users'));
     }
-    public function shareWithMeView(){
+
+    public function sharedWithMe()
+    {
         return view('user.explorer.share-me');
     }
+
     public function manageAccess($id)
     {
         $document = Document::where('user_id', auth()->id())->findOrFail($id);
@@ -49,4 +55,3 @@ class UserController extends Controller
         return view('user.explorer.manage-access', compact('document', 'users'));
     }
 }
-

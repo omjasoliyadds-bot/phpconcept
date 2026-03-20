@@ -7,7 +7,11 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    // Forgot Password Form
+    public function loginView()
+    {
+        return view('login');
+    }
+
     public function showLinkRequestForm(Request $request, $token = null)
     {
         return view('user.auth.forgot-password', [
@@ -16,7 +20,6 @@ class AuthController extends Controller
         ]);
     }
 
-    // Reset Password Form
     public function showResetPasswordForm(Request $request, $token = null)
     {
         return view('user.auth.reset-password', [
