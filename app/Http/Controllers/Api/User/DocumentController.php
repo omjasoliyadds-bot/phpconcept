@@ -148,8 +148,9 @@ class DocumentController extends Controller
         if (!$document) {
             abort(403, 'Unauthorized access or document not found.');
         }
+        auditLog('Download File', 'Document', "Downloaded file {$document->name}", null, null, $document->id);
+        return Storage::disk('local')->download($document->path, $document->name);
 
-        return Storage::disk('public')->download($document->path, $document->name);
     }
 
     public function share(Request $request, $id)
@@ -205,6 +206,7 @@ class DocumentController extends Controller
 
             Mail::to($user->email)->send(new DocumentSharedMail($document, auth()->user()));
         }
+        auditLog('Share', 'Document', "Shared file {$document->name} with " . count($request->user_ids) . " users", null, ['user_ids' => $request->user_ids, 'permissions' => $request->permission], $document->id);
 
         return response()->json([
             'status' => true,
@@ -241,8 +243,9 @@ class DocumentController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
 
-        Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
         DocumentUserPermission::where('document_id', $id)->where('user_id', $request->user_id)->delete();
+        auditLog('Revoke Access', 'Document', "Revoked access for user ID {$request->user_id} on file {$document->name}", null, null, $document->id);
 
         return response()->json(['status' => true, 'message' => 'Access revoked successfully']);
     }

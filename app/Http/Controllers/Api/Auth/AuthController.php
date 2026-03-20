@@ -33,7 +33,7 @@ class AuthController extends Controller
 
         $user = User::create([
             "name" => $request->name,
-            "email" => $request->email,
+            "email" => $request->email,  
             "password" => $request->password,
             "verification_token" => $token
         ]);
@@ -86,6 +86,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         $token = $user->createToken('auth_token')->plainTextToken;
+        auditLog('Login', 'Auth', 'User logged in successfully', null, null, $user->id, $user->id);
 
         return response()->json([
             "status" => true,
@@ -99,6 +100,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         if ($request->user()) {
+            auditLog('Logout', 'Auth', 'User logged out', null, null, $request->user()->id, $request->user()->id);
             $request->user()->tokens()->delete();
         }
 

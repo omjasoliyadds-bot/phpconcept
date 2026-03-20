@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
@@ -24,7 +25,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.view');
     Route::get('profile', [AdminUserController::class, 'profile'])->name('admin.profile');
     Route::get('document', [AdminDocumentController::class, 'index'])->name('admin.documents.view');
-    Route::get('/documents/{id}/manage-access', [AdminDocumentController::class, 'manageAccess'])->name('admin.documents.manage-access');
+    Route::get('documents/{id}/manage-access', [AdminDocumentController::class, 'manageAccess'])->name('admin.documents.manage-access');
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs');
 });
 
 // User View Routes

@@ -46,10 +46,14 @@ class UserController extends Controller
     public function toggleStatus(Request $request)
     {
         $user = User::findOrFail($request->id);
+        $oldStatus = $user->status;
         $user->status = $user->status ? 0 : 1;
         $user->save();
 
         $statusLabel = $user->status ? 'activated' : 'deactivated';
+        
+        auditLog('Toggle Status', 'User', "User {$user->name} status changed to {$statusLabel}", ['status' => $oldStatus], ['status' => $user->status], $user->id);
+
         return response()->json([
             'status' => true,
             'message' => "User account {$statusLabel} successfully"
@@ -59,10 +63,14 @@ class UserController extends Controller
     public function toggleSharing(Request $request)
     {
         $user = User::findOrFail($request->id);
+        $oldCanShare = $user->can_share;
         $user->can_share = $user->can_share ? 0 : 1;
         $user->save();
 
         $statusLabel = $user->can_share ? 'enabled' : 'disabled';
+        
+        auditLog('Toggle Sharing', 'User', "Sharing capability for {$user->name} changed to {$statusLabel}", ['can_share' => $oldCanShare], ['can_share' => $user->can_share], $user->id);
+
         return response()->json([
             'status' => true,
             'message' => "Sharing capability {$statusLabel} for user successfully"

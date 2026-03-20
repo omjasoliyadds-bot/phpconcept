@@ -23,7 +23,7 @@
         <p class="menu-label">Files & Storage</p>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a href="{{ route('admin.documents.view') }}" class="nav-link">
+                <a href="{{ route('admin.documents.view') }}" class="nav-link {{ request()->routeIs('admin.documents.view') ? 'active' : '' }}">
                     <i class="fas fa-folder"></i>
                     <span>All Documents</span>
                 </a>
@@ -35,9 +35,9 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Storage Stats</span>
+                <a href="{{ route('admin.audit-logs') }}" class="nav-link {{ request()->routeIs('admin.audit-logs') ? 'active' : '' }}">
+                    <i class="fas fa-history"></i>
+                    <span>Audit Logs</span>
                 </a>
             </li>
         </ul>

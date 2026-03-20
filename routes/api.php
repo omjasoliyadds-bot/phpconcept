@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\User\DocumentController;
 use App\Http\Controllers\Api\Admin\AdminController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\DocumentController as AdminDocumentController;
+use App\Http\Controllers\Api\Admin\AuditLogController as AdminAuditLogController;
 
 // Public API Routes (Throttled)
 Route::middleware(['throttle:6,1'])->group(function () {
@@ -34,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('profile/update/{id}', [AdminUserController::class, 'updateProfile'])->name('admin.profile.update');
         Route::post('password/update', [AdminUserController::class, 'updatePassword'])->name('admin.password.update');
         Route::get('/documents-data', [AdminDocumentController::class, 'getAllDocuments'])->name('admin.documents.data');
+        Route::get('/audit-logs-data', [AdminAuditLogController::class, 'getLogs'])->name('admin.audit-logs.data');
         Route::get('/documents/{id}/permissions', [AdminDocumentController::class, 'getPermissions'])->name('admin.documents.permissions');
         Route::post('/documents/{id}/share', [AdminDocumentController::class, 'share'])->name('admin.documents.share');
         Route::post('/documents/{id}/revoke-permission', [AdminDocumentController::class, 'revokePermission'])->name('admin.documents.revoke_permission');

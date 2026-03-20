@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Document;
+use App\Models\Folder;
+use App\Observers\DocumentObserver;
+use App\Observers\FolderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,5 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+        Document::observe(DocumentObserver::class);
+        Folder::observe(FolderObserver::class);
     }
 }
