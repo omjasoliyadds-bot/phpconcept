@@ -51,6 +51,32 @@
                 </form>
             </div>
         </div>
+
+        <!-- Storage Plan -->
+        <div class="col-md-12">
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-hdd text-info mx-2"></i>Free Storage
+                </div>
+                @php
+                    $used = auth()->user()->used_storage;
+                    $limit = auth()->user()->storage_limit;
+                    $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
+                @endphp
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="d-flex mb-2 justify-content-between">
+                            <span class="fw-bold">Your usage: {{ formatBytes($used) }} of {{ formatBytes($limit) }}</span>
+                            <span class="text-muted">{{ round($percentage) }}%</span>
+                        </div>
+                        <div class="progress" style="height: 12px; border-radius: 10px;">
+                            <div class="progress-bar {{ $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-primary') }} progress-bar-striped progress-bar-animated"
+                                role="progressbar" style="width: {{ $percentage }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 

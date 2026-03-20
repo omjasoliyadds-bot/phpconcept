@@ -13,7 +13,7 @@ class UserController extends Controller
     public function getUsers(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select(['id', 'name', 'email', 'status', 'can_share'])->where('role', 'user');
+            $users = User::select(['id', 'name', 'email', 'status', 'can_share','storage_limit'])->where('role', 'user');
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('status', function ($user) {
@@ -38,7 +38,28 @@ class UserController extends Controller
                         </div>
                     ';
                 })
-                ->rawColumns(['status', 'can_share'])
+                ->addColumn('storage', function ($user) {
+                    $used = $user->used_storage ?? 0;
+                    $limit = $user->storage_limit;
+                    $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
+                    $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
+
+                    return '
+                        <div class="d-flex flex-column" style="min-width: 150px;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>' . formatBytes($used) . ' / ' . formatBytes($limit) . '</small>
+                                <small class="fw-bold">' . round($percentage) . '%</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar ' . $colorClass . '" role="progressbar" style="width: ' . $percentage . '%;"></div>
+                            </div>
+                            <button class="btn btn-sm btn-link p-0 text-start mt-1 edit-storage" data-id="' . $user->id . '" data-limit="' . $user->storage_limit . '">
+                                <i class="fa fa-edit"></i> Edit Limit
+                            </button>
+                        </div>
+                    ';
+                })
+                ->rawColumns(['status', 'can_share', 'storage'])
                 ->make(true);
         }
     }
@@ -118,6 +139,25 @@ class UserController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Password updated successfully'
+        ]);
+    }
+    public function updateStorageLimit(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'storage_limit' => 'required|numeric|min:0' // in bytes
+        ]);
+
+        $user = User::findOrFail($request->id);
+        $oldLimit = $user->storage_limit;
+        $user->storage_limit = $request->storage_limit;
+        $user->save();
+
+        auditLog('Update Storage Limit', 'User', "Updated storage limit for {$user->name} to " . formatBytes($user->storage_limit), ['limit' => $oldLimit], ['limit' => $user->storage_limit], $user->id);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Storage limit updated successfully'
         ]);
     }
 }

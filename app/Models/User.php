@@ -27,7 +27,9 @@ class User extends Authenticatable
         'password',
         'verification_token',
         'role',
-        'status'
+        'status',
+        'can_share',
+        'storage_limit'
     ];
 
     public function isAdmin()
@@ -37,6 +39,18 @@ class User extends Authenticatable
     public function isUser()
     {
         return $this->role === 'user';
+    }
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+    public function getUsedStorageAttribute()
+    {
+        return $this->documents()->sum('size');
+    }
+    public function getRemainingStorageAttribute()
+    {
+        return $this->storage_limit - $this->used_storage;
     }
     public function sharedDocuments()
     {

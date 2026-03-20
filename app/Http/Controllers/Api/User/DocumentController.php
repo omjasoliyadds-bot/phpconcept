@@ -18,6 +18,7 @@ class DocumentController extends Controller
 {
     public function store(Request $request)
     {
+        $user = auth()->user();
         $validator = Validator::make($request->all(), [
             'document' => 'required|file|max:10240',
             'folder_id' => 'nullable|exists:folders,id',
@@ -27,7 +28,7 @@ class DocumentController extends Controller
             return response()->json(['status' => false, 'errors' => $validator->errors()]);
         }
 
-        $userId = auth()->id();
+        $userId = $user->id;
         $folderId = $request->folder_id;
 
         if ($folderId) {
@@ -41,6 +42,7 @@ class DocumentController extends Controller
         }
 
         $file = $request->file('document');
+        $fileSize = $file->getSize();
         $originalName = $file->getClientOriginalName();
 
         $duplicate = Document::where('user_id', $userId)
@@ -55,16 +57,28 @@ class DocumentController extends Controller
             ]);
         }
 
-        $extension = $file->getClientOriginalExtension();
-        $path = $file->store('documents/' . auth()->id(), 'local');
+        $usedStorage = $user->documents()->sum('size');
+
+        if (($usedStorage + $fileSize) > $user->storage_limit) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Storage limit exceeded. Please delete some files or upgrade your plan.',
+                'data' => [
+                    'used_mb' => round($usedStorage / 1024 / 1024, 2),
+                    'total_mb' => round($user->storage_limit / 1024 / 1024, 2),
+                    'remaining_mb' => round(($user->storage_limit - $usedStorage) / 1024 / 1024, 2),
+                ]
+            ], 403);
+        }
+        $path = $file->store('documents/' . $userId, 'local');
 
         $document = Document::create([
-            'user_id' => auth()->id(),
-            'folder_id' => $request->folder_id,
+            'user_id' => $userId,
+            'folder_id' => $folderId,
             'name' => $originalName,
             'path' => $path,
-            'extension' => $extension,
-            'size' => $file->getSize(),
+            'extension' => $file->getClientOriginalExtension(),
+            'size' => $fileSize,
             'mime_type' => $file->getMimeType(),
             'is_public' => false
         ]);
@@ -72,7 +86,7 @@ class DocumentController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'File uploaded successfully',
-            'document' => $document
+            'data' => $document
         ]);
     }
 

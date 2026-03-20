@@ -29,15 +29,20 @@
     </nav>
 
     <!-- Storage Monitoring Widget -->
+    @php
+        $used = auth()->user()->used_storage;
+        $limit = auth()->user()->storage_limit;
+        $percentage = $limit > 0 ? ($used / $limit) * 100 : 0;
+        $percentage = min($percentage, 100);
+    @endphp
     <div class="sidebar-storage">
         <div class="storage-title">Storage Usage</div>
         <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: 45%;" aria-valuenow="45" aria-valuemin="0"
-                aria-valuemax="100"></div>
+            <div class="progress-bar {{ $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-primary') }}" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}"aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <div class="storage-text">
-            <span>4.5 GB used</span>
-            <span>10 GB total</span>
+        <div class="storage-text d-flex justify-content-between">
+            <span>{{ formatBytes($used) }} used</span>
+            <span>{{ formatBytes($limit) }} total</span>
         </div>
     </div>
 

@@ -38,6 +38,7 @@
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Sharing</th>
+                                <th>Storage Usage</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -60,8 +61,9 @@
                     { data: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'name', name: 'name' },
                     { data: 'email', name: 'email' },
-                    { data: 'status', name: 'status' },
-                    { data: 'can_share', name: 'can_share' },
+                    { data: 'status', name: 'status', orderable: false, searchable: false },
+                    { data: 'can_share', name: 'can_share', orderable: false, searchable: false },
+                    { data: 'storage', name: 'storage', orderable: false, searchable: false },
                 ]
             });
 
@@ -132,6 +134,63 @@
                             icon: 'error',
                             title: 'Error',
                             text: 'Something went wrong!'
+                        });
+                    }
+                });
+            });
+
+            $(document).on('click', '.edit-storage', function () {
+                let id = $(this).data('id');
+                let currentLimit = $(this).data('limit');
+                let currentLimitGB = (currentLimit / (1024 * 1024 * 1024)).toFixed(2);
+
+                Swal.fire({
+                    title: 'Update Storage Limit',
+                    text: 'Enter the new storage limit in GB:',
+                    input: 'number',
+                    inputValue: currentLimitGB,
+                    showCancelButton: true,
+                    confirmButtonText: 'Update',
+                    confirmButtonColor: '#0d6efd',
+                    inputValidator: (value) => {
+                        if (!value || value < 0) {
+                            return 'Please enter a valid positive number';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let newLimitGB = result.value;
+                        let newLimitBytes = Math.round(newLimitGB * 1024 * 1024 * 1024);
+
+                        $.ajax({
+                            url: "{{ route('admin.users.update_storage_limit') }}",
+                            method: 'POST',
+                            data: {
+                                _token: "{{ csrf_token() }}",
+                                id: id,
+                                storage_limit: newLimitBytes
+                            },
+                            success: function (response) {
+                                if (response.status) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success',
+                                        text: response.message,
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 3000
+                                    });
+                                    table.ajax.reload(null, false);
+                                }
+                            },
+                            error: function (xhr) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Could not update storage limit!'
+                                });
+                            }
                         });
                     }
                 });

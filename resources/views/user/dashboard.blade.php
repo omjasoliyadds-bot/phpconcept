@@ -11,6 +11,29 @@
 
     <div class="row g-4">
 
+        <!-- Storage Usage -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-box bg-info text-white">
+                        <i class="fa fa-hdd"></i>
+                    </div>
+                    @php
+                        $used = auth()->user()->used_storage;
+                        $limit = auth()->user()->storage_limit;
+                        $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
+                    @endphp
+                    <div class="ms-3 flex-grow-1">
+                        <h6 class="text-muted mb-1">Storage Usage</h6>
+                        <h6 class="fw-bold mb-1">{{ formatBytes($used) }} / {{ formatBytes($limit) }}</h6>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar {{ $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-primary') }}" role="progressbar" style="width: {{ $percentage }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Total Documents -->
         <div class="col-xl-4 col-md-6">
             <div class="card dashboard-card border-0 shadow-sm">

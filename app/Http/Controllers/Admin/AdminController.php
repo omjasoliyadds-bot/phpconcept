@@ -11,11 +11,10 @@ class AdminController extends Controller
 {
     public function index()
     {
-        $users = User::all()->where('role', 'user')->count();
-        $documents = Document::all()->count();
-        $totalSize = Document::all()->sum('size');
-        $totalSizeMb = number_format(($totalSize / (1024 * 1024)), 2, '.', ' ');
+        $users = User::where('role', 'user')->count();
+        $documents = Document::count();
+        $totalSize = Document::sum('size');
 
-        return view('admin.dashboard', compact('users', 'documents', 'totalSizeMb'));
+        return view('admin.dashboard', compact('users', 'documents', 'totalSize'));
     }
 }

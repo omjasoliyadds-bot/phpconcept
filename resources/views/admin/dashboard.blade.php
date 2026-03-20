@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <h6 class="text-muted mb-1 fw-medium text-uppercase small">Total Users</h6>
-                <h2 class="fw-bold mb-0"><?= $users ?></h2>
+                <h2 class="fw-bold mb-0 text-primary">{{ $users }}</h2>
             </div>
         </div>
     </div>
@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <h6 class="text-muted mb-1 fw-medium text-uppercase small">Documents</h6>
-                <h2 class="fw-bold mb-0"><?= $documents ?></h2>
+                <h2 class="fw-bold mb-0 text-info">{{ $documents }}</h2>
             </div>
         </div>
     </div>
@@ -50,8 +50,26 @@
                         <i class="fas fa-database text-warning fs-4"></i>
                     </div>
                 </div>
-                <h6 class="text-muted mb-1 fw-medium text-uppercase small">Storage Used</h6>
-                <h2 class="fw-bold mb-0"><?= $totalSizeMb.'MB'?></h2>
+                <h6 class="text-muted mb-1 fw-medium text-uppercase small">Total Storage Used</h6>
+                <h2 class="fw-bold mb-0 text-warning">{{ formatBytes($totalSize) }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 4 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                        <i class="fas fa-microchip text-success fs-4"></i>
+                    </div>
+                </div>
+                @php
+                    $totalLimit = \App\Models\User::where('role', 'user')->sum('storage_limit');
+                @endphp
+                <h6 class="text-muted mb-1 fw-medium text-uppercase small">Allocated Quota</h6>
+                <h2 class="fw-bold mb-0 text-success">{{ formatBytes($totalLimit) }}</h2>
             </div>
         </div>
     </div>

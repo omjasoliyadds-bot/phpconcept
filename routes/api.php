@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/users-data', [AdminUserController::class, 'getUsers'])->name('admin.users.data');
         Route::post('/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('admin.users.toggle');
         Route::post('/toggle-sharing', [AdminUserController::class, 'toggleSharing'])->name('admin.users.toggle_sharing');
+        Route::post('/update-storage-limit', [AdminUserController::class, 'updateStorageLimit'])->name('admin.users.update_storage_limit');
         Route::post('profile/update/{id}', [AdminUserController::class, 'updateProfile'])->name('admin.profile.update');
         Route::post('password/update', [AdminUserController::class, 'updatePassword'])->name('admin.password.update');
         Route::get('/documents-data', [AdminDocumentController::class, 'getAllDocuments'])->name('admin.documents.data');
