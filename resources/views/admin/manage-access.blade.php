@@ -55,7 +55,6 @@
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Set Permissions</label>
                             <select id="permission" class="form-select select2" multiple>
-                                <option value="view" selected>View</option>
                                 <option value="edit">Edit</option>
                                 <option value="download">Download</option>
                             </select>
@@ -124,7 +123,7 @@
                     if (existing) {
                         $('#permission').val(existing.permissions).trigger('change');
                     } else {
-                        $('#permission').val(['view']).trigger('change');
+                        $('#permission').val(['edit']).trigger('change');
                     }
                 }
             });

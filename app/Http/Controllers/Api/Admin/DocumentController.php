@@ -16,7 +16,7 @@ class DocumentController extends Controller
     public function getAllDocuments(Request $request)
     {
         if ($request->ajax()) {
-            $documents = Document::with('permissions.user:id,name,email')->get();
+            $documents = Document::with(['user:id,name', 'permissions.user:id,name,email'])->get();
             return DataTables::of($documents)
                 ->addIndexColumn()
                 ->addColumn('permissions', function ($document) {
@@ -27,13 +27,15 @@ class DocumentController extends Controller
                     $html = '';
                     foreach ($grouped as $perms) {
                         $user = $perms->first()->user;
-                        $permissions = $perms->pluck('permission')->implode(', ');
+                        $permissions = $perms->pluck('permission')->map(function ($perm) {
+                            return "<span class='badge bg-info text-dark me-1'>{$perm}</span>";
+                        })->implode(' ');
                         $html .= "
-                        <div class='mb-1'>
-                            <strong>{$user->name}</strong> 
-                        <span class='badge bg-info text-dark'>{$permissions}</span>
-                        </div>
-                    ";
+                            <div class='mb-1'>
+                                <strong>{$user->name}</strong><br>
+                                {$permissions}
+                            </div>
+                        ";
                     }
 
                     return $html;
@@ -55,6 +57,7 @@ class DocumentController extends Controller
     {
         $document = Document::where('id', $id)->firstOrFail();
         $document->permissions()->delete();
+        auditLog('Revoke All Access (Admin)', 'Document', "Admin revoked all access for file \"{$document->name}\"", null, null, $document->id);
         return response()->json([
             'status' => true,
             'message' => 'Access revoked successfully'
@@ -139,6 +142,14 @@ class DocumentController extends Controller
                 }
             }
         }
+
+        $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();
+        $sharedWithNames = count($sharedWith) > 3 
+            ? implode(', ', array_slice($sharedWith, 0, 3)) . " and " . (count($sharedWith) - 3) . " others"
+            : implode(', ', $sharedWith);
+
+        auditLog('Share (Admin)', 'Document', "Admin shared file \"{$document->name}\" with {$sharedWithNames}", null, ['user_ids' => $request->user_ids, 'permissions' => $request->permission], $document->id);
+
         return response()->json([
             'status' => true,
             'message' => !empty($alreadyShared)
@@ -158,9 +169,12 @@ class DocumentController extends Controller
         }
 
         $document = Document::findOrFail($id);
+        $targetUser = User::find($request->user_id);
         DocumentUserPermission::where('document_id', $id)
             ->where('user_id', $request->user_id)
             ->delete();
+
+        auditLog('Revoke Access (Admin)', 'Document', "Admin revoked access for user \"{$targetUser->name}\" on file \"{$document->name}\"", null, null, $document->id);
 
         return response()->json([
             'status' => true,

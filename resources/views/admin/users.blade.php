@@ -38,7 +38,7 @@
                                 <th>Email</th>
                                 <th>Status</th>
                                 <th>Sharing</th>
-                                {{-- <th>Storage Usage</th> --}}
+                                <th>Storage Usage</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -63,7 +63,7 @@
                     { data: 'email', name: 'email' },
                     { data: 'status', name: 'status', orderable: false, searchable: false },
                     { data: 'can_share', name: 'can_share', orderable: false, searchable: false },
-                    // { data: 'storage', name: 'storage', orderable: false, searchable: false },
+                    { data: 'storage', name: 'storage', orderable: false, searchable: false },
                 ]
             });
 

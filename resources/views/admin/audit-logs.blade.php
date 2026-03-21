@@ -96,22 +96,22 @@
                 serverSide: true,
                 responsive: true,
                 ajax: "{{ route('admin.audit-logs.data') }}",
-                order: [[1, 'desc']], 
+                order: [[1, 'desc']],
                 columns: [
                     { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'user_name', name: 'user.name' },
-                    { 
-                        data: 'module', 
+                    {
+                        data: 'module',
                         name: 'module',
-                        render: function(data) {
+                        render: function (data) {
                             return data ? '<span class="badge badge-module">' + data + '</span>' : '-';
                         }
                     },
-                    { 
-                        data: 'action', 
+                    {
+                        data: 'action',
                         name: 'action',
-                        render: function(data) {
+                        render: function (data) {
                             return '<span class="badge badge-action">' + data + '</span>';
                         }
                     },
@@ -121,7 +121,7 @@
                         data: null,
                         orderable: false,
                         searchable: false,
-                        render: function(data) {
+                        render: function (data) {
                             return '<button class="btn btn-sm btn-outline-primary view-details" data-old=\'' + JSON.stringify(data.old_values) + '\' data-new=\'' + JSON.stringify(data.new_values) + '\'><i class="fa fa-eye"></i></button>';
                         }
                     }
@@ -131,13 +131,32 @@
                 }
             });
 
-            $(document).on('click', '.view-details', function() {
-                let oldVal = $(this).data('old');
-                let newVal = $(this).data('new');
+            $(document).on('click', '.view-details', function () {
 
-                $('#oldValues').text(oldVal ? JSON.stringify(oldVal, null, 4) : 'N/A');
-                $('#newValues').text(newVal ? JSON.stringify(newVal, null, 4) : 'N/A');
+                let oldHtml = '';
+                let newHtml = '';
 
+                let oldVal = $(this).attr('data-old');
+                let newVal = $(this).attr('data-new');
+
+                oldVal = oldVal ? JSON.parse(oldVal) : {};
+                newVal = newVal ? JSON.parse(newVal) : {};
+
+                Object.keys(oldVal).forEach(key => {
+                    let oldValue = oldVal[key] ?? '-';
+                    let newValue = newVal[key] ?? '-';
+
+                    if (oldValue == newValue) return;
+                    if (typeof oldValue === 'string' && oldValue.includes('T')) return;
+                    // LEFT SIDE (OLD)
+                    oldHtml += `<div class="text-danger mb-2">${oldValue}</div>`;
+
+                    // RIGHT SIDE (NEW)
+                    newHtml += `<div class="text-success mb-2">${newValue}</div>`;
+                });
+
+                $('#oldValues').html(oldHtml || 'No Changes');
+                $('#newValues').html(newHtml || 'No Changes');
                 $('#detailsModal').modal('show');
             });
         });

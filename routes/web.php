@@ -34,7 +34,7 @@ Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('profile', [UserController::class, 'profile'])->name('user.profile');
     Route::get('/folders', [UserController::class, 'folders'])->name('folders.index');
-    Route::get('/folders/{id}/files', [UserController::class, 'folderFiles'])->name('folders.show');
+    Route::get('/folders/{folder}/files', [UserController::class, 'folderFiles'])->name('folders.show');
     Route::get('/explorer', [UserController::class, 'explorer'])->name('explorer.index');
     Route::get('share', [UserController::class, 'sharedWithMe'])->name('user.share-with-me');
     Route::get('/documents/{id}/manage-access', [UserController::class, 'manageAccess'])->name('documents.manage-access');

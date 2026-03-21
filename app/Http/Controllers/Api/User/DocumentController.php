@@ -46,7 +46,7 @@ class DocumentController extends Controller
         $originalName = $file->getClientOriginalName();
 
         $duplicate = Document::where('user_id', $userId)
-            ->where('name', $originalName)
+            ->where('name', $originalName) 
             ->where('folder_id', $folderId)
             ->exists();
 
@@ -227,7 +227,13 @@ class DocumentController extends Controller
 
             Mail::to($user->email)->send(new DocumentSharedMail($document, auth()->user()));
         }
-        auditLog('Share', 'Document', "Shared file {$document->name} with " . count($request->user_ids) . " users", null, ['user_ids' => $request->user_ids, 'permissions' => $request->permission], $document->id);
+
+        $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();
+        $sharedWithNames = count($sharedWith) > 3 
+            ? implode(', ', array_slice($sharedWith, 0, 3)) . " and " . (count($sharedWith) - 3) . " others"
+            : implode(', ', $sharedWith);
+
+        auditLog('Share', 'Document', "Shared file \"{$document->name}\" with {$sharedWithNames}", null, ['user_ids' => $request->user_ids, 'permissions' => $request->permission], $document->id);
 
         return response()->json([
             'status' => true,
@@ -265,8 +271,9 @@ class DocumentController extends Controller
         }
 
         $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $targetUser = User::find($request->user_id);
         DocumentUserPermission::where('document_id', $id)->where('user_id', $request->user_id)->delete();
-        auditLog('Revoke Access', 'Document', "Revoked access for user ID {$request->user_id} on file {$document->name}", null, null, $document->id);
+        auditLog('Revoke Access', 'Document', "Revoked access for user \"{$targetUser->name}\" on file \"{$document->name}\"", null, null, $document->id);
 
         return response()->json(['status' => true, 'message' => 'Access revoked successfully']);
     }

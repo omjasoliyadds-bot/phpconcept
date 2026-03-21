@@ -59,6 +59,12 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function scopeActiveNonAdmin($query)
+    {
+        return $query->where('id', '!=', auth()->id())
+            ->where('role', '!=', 'admin')
+            ->where('status', 1);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

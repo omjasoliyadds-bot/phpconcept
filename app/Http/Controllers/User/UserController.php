@@ -32,14 +32,14 @@ class UserController extends Controller
 
     public function folderFiles($id)
     {
-        $folder = Folder::where('user_id', auth()->id())->findOrFail($id);
-        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->where('status', 1)->get();
+        $folder = Folder::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
+        $users = User::activeNonAdmin()->get();
         return view('user.folders.files', compact('folder', 'users'));
     }
 
     public function explorer()
     {
-        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->where('status', 1)->get();
+        $users = User::activeNonAdmin()->get();
         return view('user.explorer.index', compact('users'));
     }
 
@@ -51,7 +51,7 @@ class UserController extends Controller
     public function manageAccess($id)
     {
         $document = Document::where('user_id', auth()->id())->findOrFail($id);
-        $users = User::where('id', '!=', auth()->id())->where('role', '!=', 'admin')->where('status', 1)->get();
+        $users = User::activeNonAdmin()->get();
         return view('user.explorer.manage-access', compact('document', 'users'));
     }
 }

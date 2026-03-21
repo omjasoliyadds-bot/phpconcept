@@ -29,12 +29,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Recent Documents</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a href="{{ route('admin.audit-logs') }}" class="nav-link {{ request()->routeIs('admin.audit-logs') ? 'active' : '' }}">
                     <i class="fas fa-history"></i>
                     <span>Audit Logs</span>

@@ -17,6 +17,7 @@
                                 <th>#</th>
                                 <th>File</th>
                                 <th class="text-start">Name</th>
+                                <th class="text-start">Owner</th>
                                 <th class="text-start">Shared With</th>
                                 <th>Action</th>
                             </tr>
@@ -131,7 +132,13 @@
                     },
 
                     { data: 'name', name: 'name' },
-
+                    { 
+                        data: 'user.name', 
+                        name: 'user.name',
+                        render: function (data) {
+                            return `<strong>${data}</strong>`;
+                        }
+                    },
                     {
                         data: 'permissions',
                         name: 'permissions',
