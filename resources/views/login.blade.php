@@ -10,26 +10,98 @@
 
     <style>
         body {
-            background: #f4f6f9;
+            background: #0f172a;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: "Inter", sans-serif;
+            color: #f8fafc;
         }
 
         .card {
-            border-radius: 10px;
-            border: none;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent !important;
+            padding: 2rem 1.5rem 1rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .form-control {
-            height: 45px;
+            height: 48px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid #334155;
+            color: #f8fafc;
+            border-radius: 12px;
+            padding: 0 1rem;
+        }
+
+        .form-control:focus {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            color: #f8fafc;
+        }
+
+        .form-control::placeholder {
+            color: #64748b;
         }
 
         .btn-primary {
-            height: 45px;
-            font-weight: 500;
+            height: 48px;
+            font-weight: 600;
+            background: #6366f1;
+            border: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .mb-3.text-center a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .mb-3.text-center a:hover {
+            color: #6366f1;
+        }
+
+        .card-footer {
+            background: transparent;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            color: #94a3b8;
+        }
+
+        .card-footer a {
+            color: #6366f1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .card-footer a:hover {
+            color: #818cf8;
         }
 
         @media(max-width:576px) {

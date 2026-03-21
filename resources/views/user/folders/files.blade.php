@@ -327,6 +327,13 @@
                         } else {
                             window.showErrors(response);
                         }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error' });
+                        }
                     }
                 });
             });
@@ -348,6 +355,13 @@
                             loadFolderContents();
                         } else {
                             window.showErrors(response);
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error. Please try again.' });
                         }
                     }
                 });
@@ -430,6 +444,13 @@
                              } else {
                                  window.showErrors(response);
                              }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error' });
+                        }
                     }
                 });
             });
@@ -459,6 +480,13 @@
                              } else {
                                  window.showErrors(response);
                              }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error' });
+                        }
                     }
                 });
             });

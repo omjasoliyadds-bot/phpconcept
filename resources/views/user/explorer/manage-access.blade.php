@@ -66,7 +66,7 @@
 
                 <div class="card card-sharing border-0 p-4">
                     <h5 class="fw-bold mb-3">File Summary</h5>
-                    <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                    <div class="d-flex align-items-center p-3 text-white rounded-3" style="background: rgba(255, 255, 255, 0.05);">
                         <div class="me-3 fs-3 text-info">
                             <i class="fa {{ $document->icon }}"></i>
                         </div>
@@ -192,7 +192,7 @@
                             currentSharedUsers = response.data;
                             response.data.forEach(function (item) {
                                 html += `
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded-3 border shadow-sm transition-hover">
+                                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded-3 border-secondary shadow-sm transition-hover" style="background: rgba(255, 255, 255, 0.03); border: 1px solid #334155;">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-circle bg-primary text-white me-3">
                                                     ${item.user.name.charAt(0).toUpperCase()}

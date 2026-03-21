@@ -46,7 +46,7 @@ class DocumentController extends Controller
         $originalName = $file->getClientOriginalName();
 
         $duplicate = Document::where('user_id', $userId)
-            ->where('name', $originalName) 
+            ->where('name', $originalName)
             ->where('folder_id', $folderId)
             ->exists();
 
@@ -69,6 +69,12 @@ class DocumentController extends Controller
                     'remaining_mb' => round(($user->storage_limit - $usedStorage) / 1024 / 1024, 2),
                 ]
             ], 403);
+        }
+        if ($usedStorage > $user->storage_limit) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Storage limit exceeded. Please delete some files or upgrade your plan.',
+            ]);
         }
         $path = $file->store('documents/' . $userId, 'local');
 
@@ -202,7 +208,8 @@ class DocumentController extends Controller
 
         foreach ($request->user_ids as $userId) {
             $user = User::where('id', $userId)->where('status', 1)->first();
-            if (!$user) continue;
+            if (!$user)
+                continue;
             foreach ($request->permission as $perm) {
                 $existingPerm = DocumentUserPermission::withTrashed()->where([
                     'document_id' => $id,
@@ -229,7 +236,7 @@ class DocumentController extends Controller
         }
 
         $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();
-        $sharedWithNames = count($sharedWith) > 3 
+        $sharedWithNames = count($sharedWith) > 3
             ? implode(', ', array_slice($sharedWith, 0, 3)) . " and " . (count($sharedWith) - 3) . " others"
             : implode(', ', $sharedWith);
 
@@ -285,10 +292,13 @@ class DocumentController extends Controller
         $documents = Document::whereHas('permissions', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
-        ->with(['user', 'permissions' => function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        }])
-        ->get();
+            ->with([
+                'user',
+                'permissions' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            ])
+            ->get();
 
         return response()->json([
             'status' => true,

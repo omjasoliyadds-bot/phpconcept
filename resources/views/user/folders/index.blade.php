@@ -24,7 +24,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-medium">Folder Name</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark border-end-0 text-muted">
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
@@ -58,7 +58,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-medium">New Folder Name</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
+                                <span class="input-group-text bg-dark border-end-0 text-muted">
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
@@ -76,12 +76,12 @@
     </div>
 
     <div class="profile-card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-primary"><i class="fa fa-folder-tree me-2"></i> Folder Structure</h5>
+        <div class="card-header bg-dark py-3">
+            <h5 class="mb-0 fw-bold text-white"><i class="fa fa-folder-tree me-2"></i> Folder Structure</h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
+                <thead class="text-white">
                     <tr>
                         <th class="ps-4">Folder Name</th>
                         <th>Type</th>
@@ -121,6 +121,15 @@
                             $('#folderModal').modal('hide');
                             Swal.fire({ icon: 'success', title: 'Folder created', timer: 1500, showConfirmButton: false });
                             allFolderLoad();
+                        } else {
+                            window.showErrors(response);
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error' });
                         }
                     }
                 });
@@ -144,6 +153,15 @@
                             $('#renameFolderModal').modal('hide');
                             Swal.fire({ icon: 'success', title: 'Renamed', text: response.message, timer: 1500, showConfirmButton: false });
                             allFolderLoad();
+                        } else {
+                            window.showErrors(response);
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON) {
+                            window.showErrors(xhr.responseJSON);
+                        } else {
+                            window.showErrors({ message: 'Internal server error' });
                         }
                     }
                 });
