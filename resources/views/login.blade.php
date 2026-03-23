@@ -50,11 +50,6 @@
                         <input type="password" name="password" class="form-control" placeholder="Enter password">
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="remember">
-                        <label class="form-check-label small" for="remember">Remember me</label>
-                    </div>
-
                     <div class="d-grid">
                         <button class="btn btn-primary" type="submit">Login</button>
                     </div>
