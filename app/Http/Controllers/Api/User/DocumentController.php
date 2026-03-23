@@ -148,8 +148,8 @@ class DocumentController extends Controller
     {
         $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        if (Storage::exists($document->path)) {
-            Storage::delete($document->path);
+        if (Storage::disk('public')->exists($document->path)) {
+            Storage::disk('public')->delete($document->path);
         }
 
         $document->delete();

@@ -72,7 +72,8 @@ class FolderController extends Controller
 
     public function removeFolder($id)
     {
-        $folder = Folder::where('id', $id)->where('user_id', auth()->id())->first();
+        $userId = auth()->id();
+        $folder = Folder::where('id', $id)->where('user_id', $userId)->first();
         if (!$folder) {
             return response()->json([
                 "status" => false,
@@ -80,8 +81,29 @@ class FolderController extends Controller
             ]);
         }
 
-        $folder->delete();
-        return response()->json(["status" => true, "message" => "Folder deleted successfully"]);
+        $this->deleteFolderRecursive($folder);
+        return response()->json(["status" => true, "message" => "Folder and its contents deleted successfully"]);
+    }
+
+    private function deleteFolderRecursive($folder)
+    {
+        // Recursively delete subfolders
+        foreach ($folder->subfolders as $subfolder) {
+            $this->deleteFolderRecursive($subfolder);
+        }
+
+        // Delete all documents in this folder
+        foreach ($folder->files as $document) {
+            // Delete physical file
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($document->path)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($document->path);
+            }
+
+            $document->forceDelete();
+        }
+
+        // Finally delete the folder itself
+        $folder->forceDelete();
     }
 
     public function folderFiles($id)

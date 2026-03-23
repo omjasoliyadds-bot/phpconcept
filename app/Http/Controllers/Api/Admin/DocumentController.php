@@ -64,11 +64,11 @@ class DocumentController extends Controller
         ]);
     }
 
-    public function forcedDeleteDocument(Request $request,$id)
+    public function forcedDeleteDocument(Request $request, $id)
     {
         $document = Document::where('id', $id)->firstOrFail();
-        if(Storage::exists($document->path)){
-            Storage::delete($document->path);
+        if (Storage::disk('public')->exists($document->path)) {
+            Storage::disk('public')->delete($document->path);
         }
         $document->forceDelete();
         return response()->json([
@@ -144,7 +144,7 @@ class DocumentController extends Controller
         }
 
         $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();
-        $sharedWithNames = count($sharedWith) > 3 
+        $sharedWithNames = count($sharedWith) > 3
             ? implode(', ', array_slice($sharedWith, 0, 3)) . " and " . (count($sharedWith) - 3) . " others"
             : implode(', ', $sharedWith);
 
