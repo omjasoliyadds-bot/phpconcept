@@ -13,36 +13,86 @@ use App\Models\DocumentUserPermission;
 use App\Mail\DocumentSharedMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class DocumentController extends Controller
 {
     public function store(Request $request)
     {
         $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => 'Unauthenticated'], 401);
+        }
         $validator = Validator::make($request->all(), [
-            'document' => 'required|file|max:10240',
+            'document' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx',
             'folder_id' => 'nullable|exists:folders,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()]);
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
         }
 
+        $file = $request->file('document');
         $userId = $user->id;
         $folderId = $request->folder_id;
 
         if ($folderId) {
-            $folder = Folder::where('id', $folderId)->where('user_id', $userId)->first();
+            $folder = Folder::where('id', $folderId)
+                ->where('user_id', $userId)
+                ->first();
+
             if (!$folder) {
                 return response()->json([
                     'status' => false,
-                    'errors' => ['folder_id' => ['The selected folder is invalid or does not belong to you.']],
+                    'errors' => [
+                        'folder_id' => ['Invalid folder or unauthorized']
+                    ]
                 ]);
             }
         }
 
-        $file = $request->file('document');
-        $fileSize = $file->getSize();
+        $blockedExtensions = ['php', 'exe', 'sh', 'bat', 'js'];
+
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if (in_array($extension, $blockedExtensions)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This file type is not allowed'
+            ], 403);
+        }
+
+        $allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ];
+
+        $mime = $file->getMimeType();
+
+        if (!in_array($mime, $allowedMimes)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid file type (MIME check failed)'
+            ], 422);
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $realMime = $finfo->file($file->getPathname());
+
+        if (!in_array($realMime, $allowedMimes)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid file content (magic bytes mismatch)'
+            ], 422);
+        }
+
         $originalName = $file->getClientOriginalName();
 
         $duplicate = Document::where('user_id', $userId)
@@ -53,16 +103,19 @@ class DocumentController extends Controller
         if ($duplicate) {
             return response()->json([
                 'status' => false,
-                'errors' => ['document' => ['A file with this name already exists in this location.']],
+                'errors' => [
+                    'document' => ['File already exists in this folder']
+                ]
             ]);
         }
 
+        $fileSize = $file->getSize();
         $usedStorage = $user->documents()->sum('size');
 
         if (($usedStorage + $fileSize) > $user->storage_limit) {
             return response()->json([
                 'status' => false,
-                'message' => 'Storage limit exceeded. Please delete some files or upgrade your plan.',
+                'message' => 'Storage limit exceeded',
                 'data' => [
                     'used_mb' => round($usedStorage / 1024 / 1024, 2),
                     'total_mb' => round($user->storage_limit / 1024 / 1024, 2),
@@ -70,24 +123,28 @@ class DocumentController extends Controller
                 ]
             ], 403);
         }
-        if ($usedStorage > $user->storage_limit) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Storage limit exceeded. Please delete some files or upgrade your plan.',
-            ]);
-        }
-        $path = $file->store('documents/' . $userId, 'local');
+        $fileName = Str::uuid() . '.' . $extension;
+        $path = $file->storeAs('documents/' . $userId, $fileName, 'local');
 
         $document = Document::create([
             'user_id' => $userId,
             'folder_id' => $folderId,
             'name' => $originalName,
             'path' => $path,
-            'extension' => $file->getClientOriginalExtension(),
+            'extension' => $extension,
             'size' => $fileSize,
-            'mime_type' => $file->getMimeType(),
+            'mime_type' => $realMime,
             'is_public' => false
         ]);
+        
+        auditLog(
+            'Upload File',
+            'Document',
+            "Uploaded file {$originalName}",
+            null,
+            null,
+            $document->id
+        );
 
         return response()->json([
             'status' => true,
@@ -134,8 +191,11 @@ class DocumentController extends Controller
             ]);
         }
 
+        $oldName = $document->name;
         $document->name = $newName;
         $document->save();
+
+        auditLog('Rename File', 'Document', "Renamed file \"{$oldName}\" to \"{$newName}\"", ['name' => $oldName], ['name' => $newName], $document->id);
 
         return response()->json([
             'status' => true,
@@ -152,7 +212,11 @@ class DocumentController extends Controller
             Storage::disk('public')->delete($document->path);
         }
 
+        $documentName = $document->name;
+        $documentId = $document->id;
         $document->delete();
+
+        auditLog('Delete File', 'Document', "Deleted file \"{$documentName}\"", null, null, $documentId);
 
         return response()->json([
             'status' => true,
@@ -160,20 +224,26 @@ class DocumentController extends Controller
         ]);
     }
 
-    public function download($id)
+    public function download(Document $document)
     {
-        $document = Document::where('id', $id)
-            ->where(function ($query) {
-                $query->where('user_id', auth()->id())
-                    ->orWhere('is_public', true)
-                    ->orWhereHas('permissions', function ($q) {
-                        $q->where('user_id', auth()->id())
-                            ->where('permission', 'download');
-                    });
-            })->first();
+        $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
+        $hasPermission =
+            $document->user_id === $user->id ||
+            $document->is_public ||
+            $document->permissions()
+                ->where('user_id', $user->id)
+                ->where('permission', 'download')
+                ->exists();
 
-        if (!$document) {
-            abort(403, 'Unauthorized access or document not found.');
+        if (!$hasPermission && !$user->isAdmin()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        if (!Storage::disk('local')->exists($document->path)) {
+            abort(404, 'File not found');
         }
         auditLog('Download File', 'Document', "Downloaded file {$document->name}", null, null, $document->id);
         return Storage::disk('local')->download($document->path, $document->name);

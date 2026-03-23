@@ -106,10 +106,13 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
+        $oldData = ['name' => $user->name, 'email' => $user->email];
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
         ]);
+
+        auditLog('Admin Update Profile', 'User', "Admin {$user->name} updated their own profile", $oldData, ['name' => $user->name, 'email' => $user->email], $user->id);
 
         return response()->json([
             'status' => 'success',
@@ -135,6 +138,8 @@ class UserController extends Controller
         $user->update([
             'password' => $request->new_password
         ]);
+
+        auditLog('Admin Change Password', 'User', 'Admin changed their password', null, null, $user->id);
 
         return response()->json([
             'status' => 'success',

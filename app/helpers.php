@@ -1,8 +1,8 @@
 <?php
-use App\Models\AuditLog;
+use App\Jobs\ProcessAuditLog;
 function auditLog($action, $module = null, $description = null, $old = null, $new = null, $recordId = null, $userId = null)
 {
-    AuditLog::create([
+    $data = [
         'user_id' => $userId ?? auth()->id(),
         'module' => $module,
         'action' => $action,
@@ -12,7 +12,9 @@ function auditLog($action, $module = null, $description = null, $old = null, $ne
         'new_values' => $new,
         'ip_address' => request()->ip(),
         'user_agent' => request()->userAgent(),
-    ]);
+    ];
+
+    ProcessAuditLog::dispatch($data);
 }
 function formatBytes($bytes, $precision = 2)
 {

@@ -51,6 +51,8 @@ class FolderController extends Controller
             "parent_id" => $parentId
         ]);
 
+        auditLog('Create Folder', 'Folder', "Created folder \"{$request->name}\"", null, ['name' => $request->name], $folder->id);
+
         return response()->json([
             "status" => true,
             'message' => 'Folder created successfully',
@@ -81,7 +83,11 @@ class FolderController extends Controller
             ]);
         }
 
+        $folderName = $folder->name;
+        $folderId = $folder->id;
         $this->deleteFolderRecursive($folder);
+
+        auditLog('Delete Folder', 'Folder', "Deleted folder \"{$folderName}\" and all its contents", null, null, $folderId);
         return response()->json(["status" => true, "message" => "Folder and its contents deleted successfully"]);
     }
 
@@ -145,8 +151,11 @@ class FolderController extends Controller
             ]);
         }
 
+        $oldName = $folder->name;
         $folder->name = $request->name;
         $folder->save();
+
+        auditLog('Rename Folder', 'Folder', "Renamed folder \"{$oldName}\" to \"{$request->name}\"", ['name' => $oldName], ['name' => $request->name], $folder->id);
 
         return response()->json([
             "status" => true,

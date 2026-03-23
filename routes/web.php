@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DocumentController as AdminDocumentController;
+use App\Http\Controllers\Api\User\DocumentController as UserDocumentController;
 use App\Http\Controllers\User\UserController;
 
 // Public View Routes (Guest)
@@ -38,5 +39,5 @@ Route::middleware(['auth', 'activated'])->group(function () {
     Route::get('/explorer', [UserController::class, 'explorer'])->name('explorer.index');
     Route::get('share', [UserController::class, 'sharedWithMe'])->name('user.share-with-me');
     Route::get('/documents/{id}/manage-access', [UserController::class, 'manageAccess'])->name('documents.manage-access');
-    Route::get('/documents/{id}/download', [App\Http\Controllers\Api\User\DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/download', [UserDocumentController::class, 'download'])->name('documents.download');
 });

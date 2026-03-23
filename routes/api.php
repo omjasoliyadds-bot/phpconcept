@@ -16,15 +16,13 @@ use App\Http\Controllers\Api\Admin\DocumentController as AdminDocumentController
 use App\Http\Controllers\Api\Admin\AuditLogController as AdminAuditLogController;
 
 // Public API Routes (Throttled)
-Route::middleware(['throttle:6,1'])->group(function () {
-    Route::post('register', [AuthController::class, 'store'])->name('api.user.store');
-    Route::post('login', [AuthController::class, 'login'])->name('api.login.user');
-    Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-    Route::post('reset', [ForgotPasswordController::class, 'reset'])->name('api.password.reset');
-});
+Route::post('register', [AuthController::class, 'store'])->middleware('throttle:register')->name('api.user.store');
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:login')->name('api.login.user');
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:password')->name('password.email');
+Route::post('reset', [ForgotPasswordController::class, 'reset'])->middleware('throttle:password')->name('api.password.reset');
 Route::get('activate-account/{token}', [AuthController::class, 'activateAccount'])->name('activate.account');
 
-// Protected API Routes
+// Protected API Routes 
 Route::middleware(['auth:sanctum'])->group(function () {
     // Admin Only API Routes
     Route::middleware(['admin'])->prefix('admin')->group(function () {
