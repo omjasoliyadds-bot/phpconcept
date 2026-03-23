@@ -128,15 +128,30 @@
                                     }
                                 });
                             } else {
+                                // Specific handling for unverified email
+                                let icon = 'error';
+                                if (response.message.toLowerCase().includes('verify')) {
+                                    icon = 'warning';
+                                }
+
                                 Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
+                                    icon: icon,
+                                    title: icon === 'warning' ? 'Verification Required' : 'Error',
                                     text: response.message,
                                 });
                             }
                         },
-                        error: function (xhr, status, error) {
-                            console.log(error);
+                        error: function (xhr) {
+                            let errorMsg = xhr.responseJSON?.message || 'Something went wrong';
+                            if (xhr.status === 422 && xhr.responseJSON?.errors) {
+                                errorMsg = Object.values(xhr.responseJSON.errors)[0][0];
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login Failed',
+                                text: errorMsg,
+                            });
                         }
                     })
                 }
