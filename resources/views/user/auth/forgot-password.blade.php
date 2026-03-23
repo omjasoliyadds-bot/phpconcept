@@ -4,42 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password</title>
+    <title>Forgot Password | Private-Docs</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background: #f4f6f9;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
         }
 
-        .card {
-            border-radius: 12px;
-            border: none;
-        }
-
-        .card-header {
-            border-radius: 12px 12px 0 0;
-        }
-
-        .form-control {
-            height: 45px;
-        }
-
-        .btn-primary {
-            height: 45px;
-            font-weight: 500;
-        }
-
-        @media(max-width:576px) {
-            .card {
-                margin: 15px;
-            }
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            margin-top: 100px;
         }
     </style>
 
@@ -47,39 +27,29 @@
 
 <body>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 col-sm-10 col-12">
-                <div class="card shadow-lg">
-                    <div class="card-header bg-warning text-white text-center fw-bold">
-                        <h5 class="mb-0">Reset Link</h5>
+    <div class="container d-flex justify-content-center">
+        <div class="card auth-card shadow-sm">
+            <div class="card-header bg-white border-bottom-0 pt-4 text-center">
+                <h4 class="fw-bold">Forgot Password</h4>
+                <p class="text-muted small">Enter your email for the reset link</p>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" id="resetLinkForm">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter email" required>
                     </div>
 
-                    <div class="card-body p-4">
-                        <div class="text-center">
-                            <div class="icon-box">
-                                <i class="fa fa-envelope"></i>
-                            </div>
-
-                            <h4 class="fw-bold">Forgot Password</h4>
-                            <p class="text-muted small">
-                                Enter your email and we will send you a reset link
-                            </p>
-                        </div>
-                        <form method="POST" id="resetLinkForm">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" placeholder="Enter password">
-                            </div>
-
-                            <div class="d-grid">
-                                <button class="btn btn-primary">
-                                    <i class="fa fa-paper-plane mx-3"></i>Send Reset Link</button>
-                            </div>
-                        </form>
+                    <div class="d-grid">
+                        <button class="btn btn-primary" type="submit">Send Reset Link</button>
                     </div>
-                </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 pb-4 text-center">
+                <a href="{{ route('login') }}" class="small text-decoration-none fw-bold">Back to Login</a>
             </div>
         </div>
     </div>

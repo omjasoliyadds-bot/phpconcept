@@ -4,14 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password</title>
+    <title>Reset Password | Private-Docs</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background: #f4f6f9;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            margin-top: 100px;
         }
     </style>
 
@@ -19,51 +26,43 @@
 
 <body>
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
+    <div class="container d-flex justify-content-center">
+        <div class="card auth-card shadow-sm">
+            <div class="card-header bg-white border-bottom-0 pt-4 text-center">
+                <h4 class="fw-bold">Reset Password</h4>
+                <p class="text-muted small">Update your account password</p>
+            </div>
 
-                <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form id="resetPasswordForm" method="POST">
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $token }}">
 
-                    <div class="card-header bg-primary text-white text-center">
-                        <h5 class="card-title mb-0">Reset Password</h5>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email Address</label>
+                        <input type="email" class="form-control bg-light" name="email"
+                            value="{{ $email ?? old('email') }}" readonly>
                     </div>
 
-                    <div class="card-body">
-
-                        <form id="resetPasswordForm" method="POST">
-
-                            @csrf
-
-                            <input type="hidden" name="token" value="{{ $token }}">
-
-                            <div class="mb-3">
-                                <label class="form-label">Email address</label>
-                                <input type="email" class="form-control" name="email"
-                                    value="{{ $email ?? old('email') }}" readonly>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" required>
-                            </div>
-
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa fa-lock me-2"></i> Reset Password
-                                </button>
-                            </div>
-
-                        </form>
-
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">New Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
                     </div>
-                </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Confirm New Password</label>
+                        <input type="password" class="form-control" id="password_confirmation"
+                            name="password_confirmation" required placeholder="••••••••">
+                    </div>
+
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 pb-4 text-center">
+                <a href="{{ route('login') }}" class="small text-decoration-none fw-bold">Back to Login</a>
             </div>
         </div>
     </div>

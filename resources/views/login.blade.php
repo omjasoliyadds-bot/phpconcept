@@ -4,110 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login | Private-Docs</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
-            background: #0f172a;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Inter", sans-serif;
-            color: #f8fafc;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
         }
-
-        .card {
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-        }
-
-        .card-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: transparent !important;
-            padding: 2rem 1.5rem 1rem;
-        }
-
-        .card-body {
-            padding: 2rem;
-        }
-
-        .form-label {
-            color: #94a3b8;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            height: 48px;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid #334155;
-            color: #f8fafc;
-            border-radius: 12px;
-            padding: 0 1rem;
-        }
-
-        .form-control:focus {
-            background: rgba(15, 23, 42, 0.8);
-            border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-            color: #f8fafc;
-        }
-
-        .form-control::placeholder {
-            color: #64748b;
-        }
-
-        .btn-primary {
-            height: 48px;
-            font-weight: 600;
-            background: #6366f1;
-            border: none;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: #4f46e5;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .mb-3.text-center a {
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-        .mb-3.text-center a:hover {
-            color: #6366f1;
-        }
-
-        .card-footer {
-            background: transparent;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            color: #94a3b8;
-        }
-
-        .card-footer a {
-            color: #6366f1;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .card-footer a:hover {
-            color: #818cf8;
-        }
-
-        @media(max-width:576px) {
-            .card {
-                margin: 15px;
-            }
+        .auth-card {
+            max-width: 400px;
+            width: 100%;
+            margin-top: 100px;
         }
     </style>
 
@@ -115,44 +26,44 @@
 
 <body>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 col-sm-10 col-12">
-                <div class="card shadow">
-                    <div class="card-header text-center bg-primary text-white">
-                        <h5 class="mb-0">Login Page</h5>
+    <div class="container d-flex justify-content-center">
+        <div class="card auth-card shadow-sm">
+            <div class="card-header bg-white border-bottom-0 pt-4 text-center">
+                <h4 class="fw-bold">Login</h4>
+                <p class="text-muted small">Sign in to your account</p>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" id="userLogin">
+                    @csrf
+
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter email">
                     </div>
 
-                    <div class="card-body">
-                        <form method="POST" id="userLogin">
-                            @csrf
-
-                            <div class="mb-3">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" name="email" class="form-control" placeholder="Enter email">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control"
-                                    placeholder="Enter password">
-                            </div>
-
-                            <div class="d-grid">
-                                <button class="btn btn-primary">Login</button>
-                            </div>
-                        </form>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label">Password</label>
+                            <a href="{{ route('auth.reset-password') }}" class="small text-decoration-none">Forgot?</a>
+                        </div>
+                        <input type="password" name="password" class="form-control" placeholder="Enter password">
                     </div>
 
-                    <div class="mb-3 text-center">
-                        <a href="{{ route('auth.reset-password') }}">Forgot Password?</a>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember">
+                        <label class="form-check-label small" for="remember">Remember me</label>
                     </div>
 
-                    <div class="card-footer text-center">
-                        Create an account?
-                        <a href="/">Register Here</a>
+                    <div class="d-grid">
+                        <button class="btn btn-primary" type="submit">Login</button>
                     </div>
-                </div>
+                </form>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 pb-4 text-center">
+                <span class="text-muted small">Don't have an account?</span>
+                <a href="/" class="small text-decoration-none fw-bold">Register</a>
             </div>
         </div>
     </div>
@@ -212,7 +123,7 @@
                                     $('#userLogin')[0].reset();
                                     if (response.role == 'admin') {
                                         window.location.href = "{{ route('admin.dashboard') }}";
-                                    }else {
+                                    } else {
                                         window.location.href = "{{ route('user.dashboard') }}";
                                     }
                                 });
