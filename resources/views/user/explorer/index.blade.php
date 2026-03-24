@@ -206,7 +206,7 @@
 
                 // Folders
                 if (folders.length > 0) {
-                    // html += `<tr><td colspan="5" class="bg-light fw-bold py-2"><i class="fa fa-folder text-warning me-2"></i> Folders</td></tr>`;
+                    html += `<tr><td colspan="5" class="bg-light fw-bold py-2"><i class="fa fa-folder text-warning me-2"></i> Folders</td></tr>`;
                     folders.forEach(folder => {
                         let date = new Date(folder.created_at).toLocaleDateString('en-US', {
                             month: 'short', day: '2-digit', year: 'numeric'
@@ -241,7 +241,7 @@
 
                 // Files
                 if (files.length > 0) {
-                    // html += `<tr><td colspan="5" class="bg-light fw-bold py-2"><i class="fa fa-file text-primary me-2"></i> Files</td></tr>`;
+                    html += `<tr><td colspan="5" class="bg-light fw-bold py-2"><i class="fa fa-file text-primary me-2"></i> Files</td></tr>`;
                     files.forEach(file => {
                         let date = new Date(file.created_at).toLocaleDateString('en-US', {
                             month: 'short', day: '2-digit', year: 'numeric'
