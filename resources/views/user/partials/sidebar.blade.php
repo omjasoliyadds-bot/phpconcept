@@ -12,7 +12,7 @@
                         class="fa fa-compass me-2"></i> File Explorer</a></li>
             <li><a href="{{ route('folders.index') }}" class="{{ Route::is('folders.index') ? 'active' : '' }}"><i
                         class="fa fa-folder-open me-2"></i> Folders</a></li>
-            <li><a href="{{ route('user.share-with-me') }}"><i class="fa fa-share-nodes me-2"></i> Shared With Me</a></li>
+            <li><a href="{{ route('user.share-with-me') }}" class="{{ Route::is('user.share-with-me') ? 'active' : '' }}"><i class="fa fa-share-nodes me-2"></i> Shared With Me</a></li>
             <li><a href="{{ route('user.profile') }}" class="{{ Route::is('user.profile') ? 'active' : '' }}"><i
                         class="fa fa-user-gear me-2"></i> Profile Settings</a></li>
             <li>
