@@ -8,17 +8,19 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+use App\Enums\UserRole;
+
 class UserController extends Controller
 {
     public function getUsers(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select(['id', 'name', 'email', 'status', 'can_share','storage_limit'])->where('role', 'user');
+            $users = User::select(['id', 'name', 'email', 'status', 'can_share', 'storage_limit'])->where('role', UserRole::USER->value);
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('status', function ($user) {
-                    $checked = $user->status ? 'checked' : '';
-                    return '
+                $checked = $user->status ? 'checked' : '';
+                return '
                         <div class="form-check form-switch">
                             <input class="form-check-input toggle-status" type="checkbox" data-id="' . $user->id . '" ' . $checked . '>
                             <span class="badge ' . ($user->status ? 'bg-success' : 'bg-danger') . ' px-2 py-1">
@@ -26,10 +28,10 @@ class UserController extends Controller
                             </span>
                         </div>
                     ';
-                })
+            })
                 ->addColumn('can_share', function ($user) {
-                    $checked = $user->can_share ? 'checked' : '';
-                    return '
+                $checked = $user->can_share ? 'checked' : '';
+                return '
                         <div class="form-check form-switch">
                             <input class="form-check-input toggle-sharing" type="checkbox" data-id="' . $user->id . '" ' . $checked . '>
                             <span class="badge ' . ($user->can_share ? 'bg-primary' : 'bg-warning') . ' px-2 py-1">
@@ -37,14 +39,14 @@ class UserController extends Controller
                             </span>
                         </div>
                     ';
-                })
+            })
                 ->addColumn('storage', function ($user) {
-                    $used = $user->used_storage ?? 0;
-                    $limit = $user->storage_limit;
-                    $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
-                    $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
+                $used = $user->used_storage ?? 0;
+                $limit = $user->storage_limit;
+                $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
+                $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
 
-                    return '
+                return '
                         <div class="d-flex flex-column" style="min-width: 150px;">
                             <div class="d-flex justify-content-between mb-1">
                                 <small>' . formatBytes($used) . ' / ' . formatBytes($limit) . '</small>
@@ -58,7 +60,7 @@ class UserController extends Controller
                             </button>
                         </div>
                     ';
-                })
+            })
                 ->rawColumns(['status', 'can_share', 'storage'])
                 ->make(true);
         }
@@ -72,7 +74,7 @@ class UserController extends Controller
         $user->save();
 
         $statusLabel = $user->status ? 'activated' : 'deactivated';
-        
+
         auditLog('Toggle Status', 'User', "User {$user->name} status changed to {$statusLabel}", ['status' => $oldStatus], ['status' => $user->status], $user->id);
 
         return response()->json([
@@ -89,7 +91,7 @@ class UserController extends Controller
         $user->save();
 
         $statusLabel = $user->can_share ? 'enabled' : 'disabled';
-        
+
         auditLog('Toggle Sharing', 'User', "Sharing capability for {$user->name} changed to {$statusLabel}", ['can_share' => $oldCanShare], ['can_share' => $user->can_share], $user->id);
 
         return response()->json([

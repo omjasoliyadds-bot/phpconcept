@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
 
+use Laravel\Sanctum\HasApiTokens;
+use App\Enums\UserRole;
 
 class User extends Authenticatable
 {
@@ -34,35 +35,50 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->role === UserRole::ADMIN->value || $this->role === UserRole::ADMIN;
     }
     public function isUser()
     {
-        return $this->role === 'user';
+        return $this->role === UserRole::USER->value || $this->role === UserRole::USER;
     }
     public function documents()
     {
         return $this->hasMany(Document::class);
     }
+    public function folders()
+    {
+        return $this->hasMany(Folder::class);
+    }
+    public function permissions()
+    {
+        return $this->hasMany(DocumentUserPermission::class);
+    }
     public function getUsedStorageAttribute()
     {
+        if ($this->relationLoaded('documents')) {
+            return $this->documents->sum('size');
+        }
         return $this->documents()->sum('size');
     }
     public function getRemainingStorageAttribute()
     {
-        return $this->storage_limit - $this->used_storage;
+        return max(0, $this->storage_limit - $this->used_storage);
     }
     public function sharedDocuments()
     {
-        return $this->belongsToMany(Document::class, 'document_user_permissions')
+        return $this->belongsToMany(Document::class , 'document_user_permissions')
             ->withPivot('permission')
             ->withTimestamps();
     }
 
-    public function scopeActiveNonAdmin($query)
+    public function scopeActiveNonAdmin($query, $userId = null)
     {
-        return $query->where('id', '!=', auth()->id())
-            ->where('role', '!=', 'admin')
+        $userId = $userId ?? auth()->id();
+
+        return $query->when($userId, function ($q) use ($userId) {
+            return $q->where('id', '!=', $userId);
+        })
+            ->where('role', '!=', UserRole::ADMIN->value)
             ->where('status', 1);
     }
     /**

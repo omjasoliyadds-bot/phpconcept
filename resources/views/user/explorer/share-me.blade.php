@@ -76,7 +76,7 @@
                     let html = '';
                     if (response.status && response.data.length > 0) {
                         response.data.forEach(function (doc) {
-                            let permissions = doc.permissions?.map(p => p.permission) || [];
+                            let permissions = doc.permission_users?.map(p => p.permission) || [];
                             let permissionText = permissions.length ? permissions.join(', ') : 'N/A';
                             let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', doc.id);
                             html += `

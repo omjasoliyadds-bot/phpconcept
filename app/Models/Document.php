@@ -31,15 +31,15 @@ class Document extends Model
 
     public function folder()
     {
-        return $this->belongsTo(Folder::class, 'folder_id');
+        return $this->belongsTo(Folder::class , 'folder_id');
     }
-    public function permissions()
+    public function permissionUsers()
     {
         return $this->hasMany(DocumentUserPermission::class);
     }
     public function sharedUsers()
     {
-        return $this->belongsToMany(User::class, 'document_user_permissions')
+        return $this->belongsToMany(User::class , 'document_user_permissions')
             ->withPivot('permission')
             ->withTimestamps();
     }
@@ -57,17 +57,23 @@ class Document extends Model
 
         if ($ext == 'pdf') {
             $icon = 'fa-file-pdf text-danger';
-        } elseif (in_array($ext, ['doc', 'docx'])) {
+        }
+        elseif (in_array($ext, ['doc', 'docx'])) {
             $icon = 'fa-file-word text-primary';
-        } elseif (in_array($ext, ['xls', 'xlsx'])) {
+        }
+        elseif (in_array($ext, ['xls', 'xlsx'])) {
             $icon = 'fa-file-excel text-success';
-        } elseif (in_array($ext, ['ppt', 'pptx'])) {
+        }
+        elseif (in_array($ext, ['ppt', 'pptx'])) {
             $icon = 'fa-file-powerpoint text-warning';
-        } elseif (in_array($ext, ['png', 'jpg', 'jpeg'])) {
+        }
+        elseif (in_array($ext, ['png', 'jpg', 'jpeg'])) {
             $icon = 'fa-file-image text-info';
-        } elseif ($ext == 'txt') {
+        }
+        elseif ($ext == 'txt') {
             $icon = 'fa-file-lines text-muted';
-        } elseif ($ext == 'zip') {
+        }
+        elseif ($ext == 'zip') {
             $icon = 'fa-file-zipper text-warning';
         }
 

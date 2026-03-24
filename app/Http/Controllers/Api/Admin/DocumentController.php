@@ -16,14 +16,14 @@ class DocumentController extends Controller
     public function getAllDocuments(Request $request)
     {
         if ($request->ajax()) {
-            $documents = Document::with(['user:id,name', 'permissions.user:id,name,email'])->get();
+            $documents = Document::with(['user:id,name', 'permissionUsers.user:id,name,email'])->get();
             return DataTables::of($documents)
                 ->addIndexColumn()
                 ->addColumn('permissions', function ($document) {
-                if ($document->permissions->isEmpty()) {
+                if ($document->permissionUsers->isEmpty()) {
                     return '<span class="text-muted">No Access</span>';
                 }
-                $grouped = $document->permissions->groupBy('user_id');
+                $grouped = $document->permissionUsers->groupBy('user_id');
                 $html = '';
                 foreach ($grouped as $perms) {
                     $user = $perms->first()->user;
@@ -57,7 +57,7 @@ class DocumentController extends Controller
     public function revokeDocumentPermissions(Request $request, $id)
     {
         $document = Document::where('id', $id)->firstOrFail();
-        $document->permissions()->delete();
+        $document->permissionUsers()->delete();
         auditLog('Revoke All Access (Admin)', 'Document', "Admin revoked all access for file \"{$document->name}\"", null, null, $document->id);
         return response()->json([
             'status' => true,

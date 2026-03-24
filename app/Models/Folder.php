@@ -12,25 +12,29 @@ class Folder extends Model
         'name',
         'user_id',
         'parent_id',
-     
+
     ];
 
     protected $appends = ['total_size', 'items_count', 'subfolder_count'];
 
     public function files()
     {
-        return $this->hasMany(Document::class, 'folder_id');
+        return $this->hasMany(Document::class , 'folder_id');
     }
 
     public function subfolders()
     {
-        return $this->hasMany(Folder::class, 'parent_id');
+        return $this->hasMany(Folder::class , 'parent_id');
+    }
+    public function parent()
+    {
+        return $this->belongsTo(Folder::class , 'parent_id');
     }
     public function getTotalSizeAttribute()
     {
         $directFilesSize = $this->files()->sum('size') ?: 0;
         $subfoldersSize = 0;
-        
+
         // Eager loading subfolders would help, but for now we follow the simple recursive approach
         foreach ($this->subfolders as $subfolder) {
             $subfoldersSize += $subfolder->total_size;
@@ -41,19 +45,20 @@ class Folder extends Model
 
     public function getItemsCountAttribute()
     {
-        $directFilesCount = $this->files()->count();
-        $subfoldersCount = $this->subfolders()->count();
-        
+        $filesCount = $this->files->count();
+        $foldersCount = $this->subfolders->count();
+
         foreach ($this->subfolders as $subfolder) {
-            $directFilesCount += $subfolder->items_count;
+            $filesCount += $subfolder->items_count;
         }
 
-        return $directFilesCount + $subfoldersCount;
+        return $filesCount + $foldersCount;
     }
 
     public function getSubfolderCountAttribute()
     {
         return $this->subfolders()->count();
     }
-    
+
+
 }

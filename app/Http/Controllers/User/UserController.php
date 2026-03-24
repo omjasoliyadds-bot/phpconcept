@@ -32,8 +32,9 @@ class UserController extends Controller
 
     public function folderFiles($id)
     {
+        $user_id = auth()->id();
         $folder = Folder::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
-        $users = User::activeNonAdmin()->get();
+        $users = User::activeNonAdmin($user_id)->get();
         return view('user.folders.files', compact('folder', 'users'));
     }
 

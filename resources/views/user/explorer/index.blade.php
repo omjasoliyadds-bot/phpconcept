@@ -52,7 +52,7 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="createFolderForm" method="POST">
+                <form id="createFolderForm">
                     @csrf
                     <div class="modal-body pt-2">
                         <div class="mb-3">
@@ -172,6 +172,9 @@
 @push('scripts')
     <script>
         $(document).ready(function () {
+            $('form').on('submit', function (e) {
+                e.preventDefault();
+            });
             loadExplorer();
 
             // Load Explorer Data
@@ -210,29 +213,29 @@
                         });
                         let totalSize = folder.total_size ? (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
                         html += `
-                            <tr>
-                                <td onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3" style="width:35px;height:35px;background:#fff8e1;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fa fa-folder text-warning"></i>
+                                <tr>
+                                    <td onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3" style="width:35px;height:35px;background:#fff8e1;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-folder text-warning"></i>
+                                            </div>
+                                            <span class="fw-medium">${folder.name}</span>
                                         </div>
-                                        <span class="fw-medium">${folder.name}</span>
-                                    </div>
-                                </td>
-                                <td> <span class="badge bg-light text-dark">Folder</span></td>
-                                <td><span class="badge bg-light text-dark">${folder.subfolder_count} Subfolders</span></td>
-                                <td>${totalSize}</td>
-                                <td>${date}</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-info renameFolderBtn" data-id="${folder.id}" data-name="${folder.name}">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger deleteFolderBtn" data-id="${folder.id}">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                                    </td>
+                                    <td> <span class="badge bg-light text-dark">Folder</span></td>
+                                    <td><span class="badge bg-light text-dark">${folder.subfolder_count} Subfolders</span></td>
+                                    <td>${totalSize}</td>
+                                    <td>${date}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info renameFolderBtn" data-id="${folder.id}" data-name="${folder.name}">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger deleteFolderBtn" data-id="${folder.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
                     });
                 }
 
@@ -246,35 +249,35 @@
                         let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
                         let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', file.id);
                         html += `
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-3" style="width:35px;height:35px;background:#f3f4f6;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fa ${file.icon}"></i>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3" style="width:35px;height:35px;background:#f3f4f6;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa ${file.icon}"></i>
+                                            </div>
+                                            <span class="fw-medium">${file.name}</span>
                                         </div>
-                                        <span class="fw-medium">${file.name}</span>
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-light text-dark text-uppercase">${file.extension}</span></td>
-                                <td>-</td>
-                                <td>${size}</td>
-                                <td>${date}</td>
-                                <td class="text-end">
-                                    <a href="${downloadUrl}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fa fa-download"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <a href="/documents/${file.id}/manage-access" class="btn btn-sm btn-outline-primary">
-                                        <i class="fa fa-share-alt"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                                    </td>
+                                    <td><span class="badge bg-light text-dark text-uppercase">${file.extension}</span></td>
+                                    <td>-</td>
+                                    <td>${size}</td>
+                                    <td>${date}</td>
+                                    <td class="text-end">
+                                        <a href="${downloadUrl}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-download"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-info renameDocBtn" data-id="${file.id}" data-name="${file.name.split('.').slice(0, -1).join('.')}">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <a href="/documents/${file.id}/manage-access" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-share-alt"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger deleteDocBtn" data-id="${file.id}">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
                     });
                 }
 
@@ -309,14 +312,14 @@
                         contentType: false,
                         processData: false,
                         success: function (response) {
-                             if (response.status) {
-                                 $('#folderModal').modal('hide');
-                                 form.reset();
-                                 window.showSuccess(response.message);
-                                 loadExplorer();
-                             } else {
-                                 window.showErrors(response);
-                             }
+                            if (response.status) {
+                                $('#folderModal').modal('hide');
+                                form.reset();
+                                window.showSuccess(response.message);
+                                loadExplorer();
+                            } else {
+                                window.showErrors(response);
+                            }
                         },
                         error: function (xhr) {
                             if (xhr.responseJSON) {
@@ -350,13 +353,13 @@
                         method: "PUT",
                         data: $(form).serialize(),
                         success: function (response) {
-                             if (response.status) {
-                                 $('#renameFolderModal').modal('hide');
-                                 window.showSuccess(response.message);
-                                 loadExplorer();
-                             } else {
-                                 window.showErrors(response);
-                             }
+                            if (response.status) {
+                                $('#renameFolderModal').modal('hide');
+                                window.showSuccess(response.message);
+                                loadExplorer();
+                            } else {
+                                window.showErrors(response);
+                            }
                         },
                         error: function (xhr) {
                             if (xhr.responseJSON) {
@@ -413,14 +416,14 @@
                         processData: false,
                         contentType: false,
                         success: function (response) {
-                             if (response.status) {
-                                 $('#uploadModal').modal('hide');
-                                 form.reset();
-                                 window.showSuccess(response.message);
-                                 loadExplorer();
-                             } else {
-                                 window.showErrors(response);
-                             }
+                            if (response.status) {
+                                $('#uploadModal').modal('hide');
+                                form.reset();
+                                window.showSuccess(response.message);
+                                loadExplorer();
+                            } else {
+                                window.showErrors(response);
+                            }
                         },
                         error: function (xhr) {
                             if (xhr.responseJSON) {
@@ -454,13 +457,13 @@
                         method: "PUT",
                         data: $(form).serialize(),
                         success: function (response) {
-                             if (response.status) {
-                                 $('#renameDocModal').modal('hide');
-                                 window.showSuccess(response.message);
-                                 loadExplorer();
-                             } else {
-                                 window.showErrors(response);
-                             }
+                            if (response.status) {
+                                $('#renameDocModal').modal('hide');
+                                window.showSuccess(response.message);
+                                loadExplorer();
+                            } else {
+                                window.showErrors(response);
+                            }
                         },
                         error: function (xhr) {
                             if (xhr.responseJSON) {

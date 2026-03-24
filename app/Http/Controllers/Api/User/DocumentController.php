@@ -167,7 +167,7 @@ class DocumentController extends Controller
         $document = Document::where('id', $id)
             ->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
-                    ->orWhereHas('permissions', function ($q) use ($userId) {
+                    ->orWhereHas('permissionUsers', function ($q) use ($userId) {
                         $q->where('user_id', $userId)
                             ->where('permission', 'edit');
                     });
@@ -233,7 +233,7 @@ class DocumentController extends Controller
         $hasPermission =
             $document->user_id === $user->id ||
             $document->is_public ||
-            $document->permissions()
+            $document->permissionUsers()
                 ->where('user_id', $user->id)
                 ->where('permission', 'download')
                 ->exists();
@@ -359,12 +359,12 @@ class DocumentController extends Controller
     {
         $userId = auth()->id();
 
-        $documents = Document::whereHas('permissions', function ($query) use ($userId) {
+        $documents = Document::whereHas('permissionUsers', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
             ->with([
                 'user',
-                'permissions' => function ($query) use ($userId) {
+                'permissionUsers' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 }
             ])
