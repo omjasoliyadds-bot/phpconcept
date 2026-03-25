@@ -14,6 +14,20 @@
     </div>
 
     <div class="d-flex align-items-center">
+        <div class="me-3">
+            <a href="#" class="position-relative text-decoration-none" id="notificationBell" data-bs-toggle="modal"
+                data-bs-target="#notificationModal">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px;">
+                    <i class="fas fa-bell text-dark"></i>
+                </div>
+                <span id="notificationCount"
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
+                    style="font-size: 10px; display: none;">
+                    0
+                </span>
+            </a>
+        </div>
 
         <!-- User Profile -->
         <div class="dropdown profile-dropdown">
@@ -24,16 +38,17 @@
                     <p class="mb-0 text-muted" style="font-size: 11px;">Administrator</p>
                 </div>
                 <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=4361ee&color=fff"
-                    alt="Profile">
+                    alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="far fa-user me-2"></i> My
-                        Profile</a></li>
+                <li><a class="dropdown-item py-2" href="{{ route('admin.profile') }}"><i
+                            class="far fa-user me-2 text-muted"></i> My Profile</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a class="dropdown-item text-danger logout-btn" href="javascript:void(0)" style="cursor: pointer;">
+                    <a class="dropdown-item py-2 text-danger logout-btn" href="javascript:void(0)"
+                        style="cursor: pointer;">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout
                     </a>
                 </li>
@@ -42,9 +57,45 @@
     </div>
 </header>
 
+<!-- Notification Modal -->
+<div class="modal fade right" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-md">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom-0 pb-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center" id="notificationModalLabel">
+                    <i class="fas fa-bell text-primary me-2"></i>
+                    <span class="badge bg-warning ms-2 rounded-pill fs-6" id="allNotifications">Latest Notifications</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="background-color: white;">
+                <div id="notificationList" class="list-group list-group-flush">
+                    <div class="p-5 text-center text-muted">
+                        <i class="far fa-bell-slash fs-1 mb-3 text-light"></i>
+                        <p class="mb-0 mb-3 fs-5">No notifications</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-white border-top d-flex justify-content-between px-3 py-2">
+
+                <button id="markAllReadBtn" class="btn btn-sm btn-outline-primary">
+                    Mark all as read
+                </button>
+
+                <a href="" class="btn btn-sm btn-primary">
+                    View All
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
     <script>
         $(document).ready(function () {
+            loadLatestNotifications();
             $('.logout-btn').on('click', function (e) {
                 console.log('Logout button clicked');
                 e.preventDefault();
@@ -92,5 +143,75 @@
                 });
             });
         });
+        function loadLatestNotifications() {
+            $.ajax({
+                url: "{{ route('user.get.notification') }}",
+                method: 'GET',
+                success: function (response) {
+                    let html = '';
+                    let notifications = response.notifications;
+
+                    if (notifications.length > 0) {
+
+                        notifications.forEach(notification => {
+                            let data = notification.data;
+                            html += `
+                                    <a href="#" class="list-group-item list-group-item-action border-0 border-bottom py-3 notification-item ${notification.read_at ? 'bg-white' : 'bg-primary bg-opacity-10'}" data-id="${notification.id}" style="transition: all 0.2s;">
+                                        <div class="d-flex align-items-start">
+
+                                            <div class="me-3 bg-white text-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-file-alt fs-5"></i>
+                                            </div>
+
+                                            <!-- Content -->
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="fw-semibold text-dark text-truncate mb-1">
+                                                    ${data.uploaded_by ?? 'User'}
+                                                </div>
+                                                <div class="small text-muted mb-2 text-wrap">
+                                                    uploaded <b class="text-dark">${data.document_name}</b>
+                                                </div>
+                                                <div class="text-secondary d-flex align-items-center" style="font-size: 0.75rem;">
+                                                    <i class="far fa-clock me-1"></i> ${timeAgo(notification.created_at)}
+                                                </div>
+                                            </div>
+
+                                            ${notification.read_at ? '' : '<div class="ms-2 mt-2"><span class="bg-primary rounded-circle d-block shadow-sm" style="width: 10px; height: 10px;"></span></div>'}
+
+                                        </div>
+                                    </a>
+                                `;
+                        });
+
+                    } else {
+                        html = `
+                                <div class="p-5 text-center text-muted">
+                                    <i class="far fa-bell-slash fs-1 mb-3 text-light"></i>
+                                    <p class="mb-0 fs-5">No notifications</p>
+                                </div>`;
+                    }
+
+                    $('#notificationList').html(html);
+                    let unreadCount = response.unreadCount;
+
+                    if (unreadCount > 0) {
+                        $('#notificationCount').text(unreadCount).show();
+                    } else {
+                        $('#notificationCount').hide();
+                    }
+                }
+            });
+        }
+
+        function timeAgo(datetime) {
+            const now = new Date();
+            const past = new Date(datetime);
+            const diff = Math.floor((now - past) / 1000);
+
+            if (diff < 60) return "Just now";
+            if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+            if (diff < 86400) return Math.floor(diff / 3600) + " hr ago";
+            return Math.floor(diff / 86400) + " days ago";
+        }
     </script>
 @endpush

@@ -14,6 +14,7 @@ use App\Mail\DocumentSharedMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\DocumentNotification;
 
 class DocumentController extends Controller
 {
@@ -136,6 +137,11 @@ class DocumentController extends Controller
             'mime_type' => $realMime,
             'is_public' => false
         ]);
+        $admin = User::where('role', 'admin')->first();
+
+        if ($admin) {
+            $admin->notify(new DocumentNotification($document,$document->user));
+        }
         
         auditLog(
             'Upload File',

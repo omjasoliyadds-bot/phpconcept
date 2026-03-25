@@ -73,5 +73,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
         
         Route::get('share', [DocumentController::class, 'sharedWithMe'])->name('user.get.share.documents');
+        Route::get('notifications',[AdminUserController::class, 'getNotification'])->name('user.get.notification');
     });
 });

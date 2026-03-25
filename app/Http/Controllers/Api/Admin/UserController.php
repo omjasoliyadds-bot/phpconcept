@@ -167,4 +167,16 @@ class UserController extends Controller
             'message' => 'Storage limit updated successfully'
         ]);
     }
+
+    public function getNotification(Request $request)
+    {
+        $user = auth()->user();
+        $notifications = $user->notifications()->latest()->limit(5)->get();
+        $unreadCount = $user->unreadNotifications()->where('read_at',null)->count();
+        return response()->json([
+            'status' => true,
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount
+        ]);
+    }
 }
