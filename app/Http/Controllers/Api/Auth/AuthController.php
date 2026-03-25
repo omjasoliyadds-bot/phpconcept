@@ -93,7 +93,12 @@ class AuthController extends Controller
             "message" => "Login successful",
             "token" => $token,
             "role" => $user->role,
-            "data" => $user
+            "data" => [
+                "id" => $user->id,
+                "name" => $user->name,
+                "email" => $user->email,
+                "role" => $user->role
+            ]
         ]);
     }
 

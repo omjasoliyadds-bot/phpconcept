@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Folder;
 use App\Models\Document;
 
@@ -85,31 +86,10 @@ class FolderController extends Controller
 
         $folderName = $folder->name;
         $folderId = $folder->id;
-        $this->deleteFolderRecursive($folder);
+        Folder::deleteRecursive($folder);
 
         auditLog('Delete Folder', 'Folder', "Deleted folder \"{$folderName}\" and all its contents", null, null, $folderId);
         return response()->json(["status" => true, "message" => "Folder and its contents deleted successfully"]);
-    }
-
-    private function deleteFolderRecursive($folder)
-    {
-        // Recursively delete subfolders
-        foreach ($folder->subfolders as $subfolder) {
-            $this->deleteFolderRecursive($subfolder);
-        }
-
-        // Delete all documents in this folder
-        foreach ($folder->files as $document) {
-            // Delete physical file
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($document->path)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($document->path);
-            }
-
-            $document->forceDelete();
-        }
-
-        // Finally delete the folder itself
-        $folder->forceDelete();
     }
 
     public function folderFiles($id)

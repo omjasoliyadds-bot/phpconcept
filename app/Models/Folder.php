@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Facades\Storage;
 class Folder extends Model
 {
     use SoftDeletes;
@@ -32,10 +32,9 @@ class Folder extends Model
     }
     public function getTotalSizeAttribute()
     {
-        $directFilesSize = $this->files()->sum('size') ?: 0;
+        $directFilesSize = $this->relationLoaded('files') ? ($this->files->sum('size') ?: 0) : ($this->files()->sum('size') ?: 0);
         $subfoldersSize = 0;
 
-        // Eager loading subfolders would help, but for now we follow the simple recursive approach
         foreach ($this->subfolders as $subfolder) {
             $subfoldersSize += $subfolder->total_size;
         }
@@ -45,8 +44,8 @@ class Folder extends Model
 
     public function getItemsCountAttribute()
     {
-        $filesCount = $this->files->count();
-        $foldersCount = $this->subfolders->count();
+        $filesCount = $this->relationLoaded('files') ? $this->files->count() : $this->files()->count();
+        $foldersCount = $this->relationLoaded('subfolders') ? $this->subfolders->count() : $this->subfolders()->count();
 
         foreach ($this->subfolders as $subfolder) {
             $filesCount += $subfolder->items_count;
@@ -57,8 +56,27 @@ class Folder extends Model
 
     public function getSubfolderCountAttribute()
     {
-        return $this->subfolders()->count();
+        return $this->relationLoaded('subfolders') ? $this->subfolders->count() : $this->subfolders()->count();
     }
 
+    public static function deleteRecursive($folder)
+    {
+        // Recursively delete subfolders
+        foreach ($folder->subfolders as $subfolder) {
+            self::deleteRecursive($subfolder);
+        }
 
+        // Delete all documents in this folder
+        foreach ($folder->files as $document) {
+            // Delete physical file
+            if (Storage::disk('local')->exists($document->path)) {
+                Storage::disk('local')->delete($document->path);
+            }
+
+            $document->forceDelete();
+        }
+
+        // Finally delete the folder itself
+        $folder->forceDelete();
+    }
 }

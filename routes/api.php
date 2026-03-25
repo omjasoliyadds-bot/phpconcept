@@ -31,6 +31,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('admin.users.toggle');
         Route::post('/toggle-sharing', [AdminUserController::class, 'toggleSharing'])->name('admin.users.toggle_sharing');
         Route::post('/update-storage-limit', [AdminUserController::class, 'updateStorageLimit'])->name('admin.users.update_storage_limit');
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.delete');
         Route::post('profile/update/{id}', [AdminUserController::class, 'updateProfile'])->name('admin.profile.update');
         Route::post('password/update', [AdminUserController::class, 'updatePassword'])->name('admin.password.update');
         Route::get('/documents-data', [AdminDocumentController::class, 'getAllDocuments'])->name('admin.documents.data');
@@ -53,7 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('change-password', [UserController::class, 'changePassword'])->name('api.user.change-password');
 
         // Folder API Routes
-        Route::prefix('folders')->group(function () {
+        Route::group(['prefix' => 'folders'], function () {
             Route::post('/store', [FolderController::class, 'folderCreate'])->name('api.folders.store');
             Route::get('/all', [FolderController::class, 'getAllFolders'])->name('api.folders.all');
             Route::get('/explorer', [FolderController::class, 'getExplorerData'])->name('api.folders.explorer');
@@ -63,7 +64,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         // Document API Routes
-        Route::prefix('documents')->group(function () {
+        Route::group(['prefix' => 'documents'], function () {
             Route::post('/upload', [DocumentController::class, 'store'])->name('api.documents.upload');
             Route::put('/{id}', [DocumentController::class, 'update'])->name('api.documents.update');
             Route::delete('/{id}', [DocumentController::class, 'destroy'])->name('api.documents.destroy');
@@ -74,5 +75,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         
         Route::get('share', [DocumentController::class, 'sharedWithMe'])->name('user.get.share.documents');
         Route::get('notifications',[AdminUserController::class, 'getNotification'])->name('user.get.notification');
+        Route::post('notifications/mark-as-read', [AdminUserController::class, 'markAsRead'])->name('user.notifications.mark_read');
     });
 });

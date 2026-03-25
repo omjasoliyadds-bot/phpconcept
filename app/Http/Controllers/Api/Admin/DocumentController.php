@@ -27,13 +27,14 @@ class DocumentController extends Controller
                 $html = '';
                 foreach ($grouped as $perms) {
                     $user = $perms->first()->user;
+                    $userName = e($user->name);
                     $permissions = $perms->pluck('permission')->map(function ($perm) {
                                 return "<span class='badge bg-info text-dark me-1'>{$perm}</span>";
                             }
                             )->implode(' ');
                             $html .= "
                             <div class='mb-1'>
-                                <strong>{$user->name}</strong><br>
+                                <strong>{$userName}</strong><br>
                                 {$permissions}
                             </div>
                         ";
@@ -68,8 +69,8 @@ class DocumentController extends Controller
     public function forcedDeleteDocument(Request $request, $id)
     {
         $document = Document::where('id', $id)->firstOrFail();
-        if (Storage::disk('public')->exists($document->path)) {
-            Storage::disk('public')->delete($document->path);
+        if (Storage::disk('local')->exists($document->path)) {
+            Storage::disk('local')->delete($document->path);
         }
         $documentName = $document->name;
         $documentId = $document->id;
@@ -148,6 +149,9 @@ class DocumentController extends Controller
                     ]);
                 }
             }
+            
+            // Send notification email
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\DocumentSharedMail($document, auth()->user()));
         }
 
         $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();

@@ -6,16 +6,19 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
+use App\Models\Document;
+use App\Models\User;
 
-class DocumentNotification extends Notification
+class DocumentNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SerializesModels;
     public $document;
     public $user;
     /**
      * Create a new notification instance.
      */
-    public function __construct($document, $user)
+    public function __construct(Document $document, User $user)
     {
         $this->document = $document;
         $this->user = $user;
@@ -32,17 +35,6 @@ class DocumentNotification extends Notification
     }
 
     /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
-    }
-
-    /**
      * Get the array representation of the notification.
      *
      * @return array<string, mixed>
@@ -54,7 +46,10 @@ class DocumentNotification extends Notification
             'document_name' => $this->document->name,
             'uploaded_by' => $this->user->name,
             'user_id' => $this->user->id,
-            'message' => "{$this->user->name} uploaded a new document",
+            'title' => 'New Document Uploaded',
+            'message' => "{$this->user->name} has uploaded a new document: {$this->document->name}",
+            'action_url' => route('admin.documents.view'),
+            'type' => 'document_upload'
         ];
     }
 }

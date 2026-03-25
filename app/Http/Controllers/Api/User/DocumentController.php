@@ -111,7 +111,7 @@ class DocumentController extends Controller
         }
 
         $fileSize = $file->getSize();
-        $usedStorage = $user->documents()->sum('size');
+        $usedStorage = $user->used_storage;
 
         if (($usedStorage + $fileSize) > $user->storage_limit) {
             return response()->json([
@@ -140,7 +140,7 @@ class DocumentController extends Controller
         $admin = User::where('role', 'admin')->first();
 
         if ($admin) {
-            $admin->notify(new DocumentNotification($document,$document->user));
+            $admin->notify(new DocumentNotification($document, $user));
         }
         
         auditLog(
@@ -184,7 +184,7 @@ class DocumentController extends Controller
             $newName .= '.' . $document->extension;
         }
 
-        $duplicate = Document::where('user_id', $userId)
+        $duplicate = Document::where('user_id', $document->user_id)
             ->where('name', $newName)
             ->where('folder_id', $document->folder_id)
             ->where('id', '!=', $id)
@@ -214,8 +214,8 @@ class DocumentController extends Controller
     {
         $document = Document::where('id', $id)->where('user_id', auth()->id())->firstOrFail();
 
-        if (Storage::disk('public')->exists($document->path)) {
-            Storage::disk('public')->delete($document->path);
+        if (Storage::disk('local')->exists($document->path)) {
+            Storage::disk('local')->delete($document->path);
         }
 
         $documentName = $document->name;

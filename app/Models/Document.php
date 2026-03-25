@@ -44,11 +44,6 @@ class Document extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Get the icon class based on document extension.
-     *
-     * @return string
-     */
     public function getIconAttribute()
     {
         $ext = strtolower($this->extension);

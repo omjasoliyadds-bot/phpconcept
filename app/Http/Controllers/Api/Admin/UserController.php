@@ -9,13 +9,19 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 use App\Enums\UserRole;
+use App\Models\Folder;
+use App\Models\Document;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     public function getUsers(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::select(['id', 'name', 'email', 'status', 'can_share', 'storage_limit'])->where('role', UserRole::USER->value);
+            $users = User::withSum('documents', 'size')
+                ->where('role', UserRole::USER->value)
+                ->select(['id', 'name', 'email', 'status', 'can_share', 'storage_limit']);
+            
             return DataTables::of($users)
                 ->addIndexColumn()
                 ->addColumn('status', function ($user) {
@@ -41,7 +47,7 @@ class UserController extends Controller
                     ';
             })
                 ->addColumn('storage', function ($user) {
-                $used = $user->used_storage ?? 0;
+                $used = $user->documents_sum_size ?? 0;
                 $limit = $user->storage_limit;
                 $percentage = $limit > 0 ? min(($used / $limit) * 100, 100) : 0;
                 $colorClass = $percentage > 90 ? 'bg-danger' : ($percentage > 70 ? 'bg-warning' : 'bg-success');
@@ -61,7 +67,16 @@ class UserController extends Controller
                         </div>
                     ';
             })
-                ->rawColumns(['status', 'can_share', 'storage'])
+                ->addColumn('action', function ($user) {
+                return '
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-danger delete-user" data-id="' . $user->id . '" title="Permanently Delete User and All Their Files">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    ';
+            })
+                ->rawColumns(['status', 'can_share', 'storage', 'action'])
                 ->make(true);
         }
     }
@@ -177,6 +192,52 @@ class UserController extends Controller
             'status' => true,
             'notifications' => $notifications,
             'unreadCount' => $unreadCount
+        ]);
+    }
+    public function markAsRead(Request $request)
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return response()->json([
+            'status' => true,
+            'message' => 'Notifications marked as read'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        if (auth()->id() == $id) {
+            return response()->json(['status' => false, 'message' => 'You cannot delete yourself'], 403);
+        }
+
+        $user = User::findOrFail($id);
+        $userName = $user->name;
+
+        // 1. Delete all folders (and files inside them)
+        $folders = Folder::where('user_id', $id)->get();
+        foreach ($folders as $folder) {
+            Folder::deleteRecursive($folder);
+        }
+
+        // 2. Delete all remaining "loose" files not in any folder
+        $looseFiles = Document::where('user_id', $id)->whereNull('folder_id')->get();
+        foreach ($looseFiles as $doc) {
+            if (Storage::disk('local')->exists($doc->path)) {
+                Storage::disk('local')->delete($doc->path);
+            }
+            $doc->forceDelete();
+        }
+
+        // 3. Delete user notifications
+        $user->notifications()->delete();
+
+        // 4. Delete the user
+        $user->forceDelete();
+
+        auditLog('Delete User', 'User', "Permanently deleted user \"{$userName}\" and all their documents", null, null, $id);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User and all associated data deleted successfully'
         ]);
     }
 }

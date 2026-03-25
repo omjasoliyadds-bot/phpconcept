@@ -3,11 +3,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Notifications\Notifiable;
-
 class DocumentUserPermission extends Model
 {
-    use SoftDeletes, Notifiable;
+    use SoftDeletes;
     protected $table = "document_user_permissions";
     protected $fillable = [
         'document_id',

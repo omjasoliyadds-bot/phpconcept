@@ -39,6 +39,7 @@
                                 <th>Status</th>
                                 <th>Sharing</th>
                                 <th>Storage Usage</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -64,7 +65,49 @@
                     { data: 'status', name: 'status', orderable: false, searchable: false },
                     { data: 'can_share', name: 'can_share', orderable: false, searchable: false },
                     { data: 'storage', name: 'storage', orderable: false, searchable: false },
+                    { data: 'action', name: 'action', orderable: false, searchable: false },
                 ]
+            });
+
+            $(document).on('click', '.delete-user', function () {
+                let id = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will permanently delete the user and all their documents from the server! This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete everything!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('admin.users.delete', ':id') }}".replace(':id', id),
+                            method: 'DELETE',
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: function (response) {
+                                if (response.status) {
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'The user and all their data have been deleted.',
+                                        'success'
+                                    );
+                                    table.ajax.reload();
+                                }
+                            },
+                            error: function (xhr) {
+                                Swal.fire(
+                                    'Error!',
+                                    'Could not delete user: ' + xhr.responseJSON.message,
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
             });
 
             $(document).on('change', '.toggle-status', function () {
