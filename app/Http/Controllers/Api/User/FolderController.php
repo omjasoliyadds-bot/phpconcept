@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Folder;
 use App\Models\Document;
+use App\Models\User;
+use App\Notifications\FolderNotification;
 
 class FolderController extends Controller
 {
@@ -54,6 +56,17 @@ class FolderController extends Controller
 
         auditLog('Create Folder', 'Folder', "Created folder \"{$request->name}\"", null, ['name' => $request->name], $folder->id);
 
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            /** @var \App\Models\User $currentUser */
+            $currentUser = auth()->user();
+            foreach ($admins as $admin) {
+                if ($admin->id !== $currentUser->id) {
+                    $admin->notify(new FolderNotification($folder, $currentUser, 'created'));
+                }
+            }
+        }
+
         return response()->json([
             "status" => true,
             'message' => 'Folder created successfully',
@@ -89,6 +102,17 @@ class FolderController extends Controller
         Folder::deleteRecursive($folder);
 
         auditLog('Delete Folder', 'Folder', "Deleted folder \"{$folderName}\" and all its contents", null, null, $folderId);
+
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            /** @var \App\Models\User $currentUser */
+            $currentUser = auth()->user();
+            foreach ($admins as $admin) {
+                if ($admin->id !== $currentUser->id) {
+                    $admin->notify(new FolderNotification($folder, $currentUser, 'deleted'));
+                }
+            }
+        }
         return response()->json(["status" => true, "message" => "Folder and its contents deleted successfully"]);
     }
 

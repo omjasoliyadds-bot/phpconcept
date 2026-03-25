@@ -186,17 +186,40 @@ class UserController extends Controller
     public function getNotification(Request $request)
     {
         $user = auth()->user();
-        $notifications = $user->notifications()->latest()->limit(5)->get();
-        $unreadCount = $user->unreadNotifications()->where('read_at',null)->count();
+        $query = $user->notifications()->latest();
+
+        if ($request->boolean('all')) {
+            $notifications = $query->get();
+        } else {
+            $notifications = $query->limit(5)->get();
+        }
+
+        $unreadCount = $user->unreadNotifications()->count();
+
         return response()->json([
             'status' => true,
             'notifications' => $notifications,
             'unreadCount' => $unreadCount
         ]);
     }
-    public function markAsRead(Request $request)
+    public function markAsRead(Request $request, $id = null)
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        $user = auth()->user();
+
+        if ($id) {
+            $notification = $user->notifications()->where('id', $id)->first();
+            if ($notification && is_null($notification->read_at)) {
+                $notification->markAsRead();
+            }
+        } elseif ($request->filled('id')) {
+            $notification = $user->notifications()->where('id', $request->id)->first();
+            if ($notification && is_null($notification->read_at)) {
+                $notification->markAsRead();
+            }
+        } else {
+            $user->unreadNotifications->markAsRead();
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Notifications marked as read'

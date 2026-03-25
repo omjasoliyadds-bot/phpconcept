@@ -23,6 +23,10 @@ Route::middleware(['guest'])->group(function () {
 // Admin View Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('notifications', [AdminUserController::class, 'notifications'])->name('admin.notifications');
+    Route::get('notifications-data', [AdminUserController::class, 'getNotification'])->name('admin.notifications.data');
+    Route::post('notifications/mark-as-read', [AdminUserController::class, 'markAsRead'])->name('admin.notifications.mark_read');
+    Route::post('notifications/{id}/mark-as-read', [AdminUserController::class, 'markAsRead'])->name('admin.notifications.mark_read.single');
     Route::get('users', [AdminUserController::class, 'index'])->name('admin.users.view');
     Route::get('profile', [AdminUserController::class, 'profile'])->name('admin.profile');
     Route::get('document', [AdminDocumentController::class, 'index'])->name('admin.documents.view');

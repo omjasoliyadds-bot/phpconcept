@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\DocumentNotification;
+use App\Notifications\DocumentDeleteNotification;
 
 class DocumentController extends Controller
 {
@@ -137,12 +138,15 @@ class DocumentController extends Controller
             'mime_type' => $realMime,
             'is_public' => false
         ]);
-        $admin = User::where('role', 'admin')->first();
-
-        if ($admin) {
-            $admin->notify(new DocumentNotification($document, $user));
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            foreach ($admins as $admin) {
+                if ($admin->id !== $user->id) {
+                    $admin->notify(new DocumentNotification($document, $user));
+                }
+            }
         }
-        
+
         auditLog(
             'Upload File',
             'Document',
@@ -223,6 +227,17 @@ class DocumentController extends Controller
         $document->delete();
 
         auditLog('Delete File', 'Document', "Deleted file \"{$documentName}\"", null, null, $documentId);
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $admins = User::where('role', 'admin')->get();
+        if ($admins->isNotEmpty()) {
+            foreach ($admins as $admin) {
+                if ($admin->id !== $user->id) {
+                    $admin->notify(new DocumentDeleteNotification($documentName, $user));
+                }
+            }
+        }
 
         return response()->json([
             'status' => true,

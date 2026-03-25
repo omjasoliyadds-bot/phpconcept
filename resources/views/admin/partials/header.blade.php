@@ -83,7 +83,7 @@
                     Mark all as read
                 </button>
 
-                <a href="" class="btn btn-sm btn-primary">
+                <a href="{{ route('admin.notifications') }}" class="btn btn-sm btn-primary">
                     View All
                 </a>
 
@@ -96,6 +96,59 @@
     <script>
         $(document).ready(function () {
             loadLatestNotifications();
+
+            // Refresh notifications when modal opens
+            $('#notificationModal').on('shown.bs.modal', function () {
+                loadLatestNotifications();
+            });
+
+            $('#markAllReadBtn').on('click', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{{ route('admin.notifications.mark_read') }}",
+                    method: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            loadLatestNotifications();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'All marked read',
+                                timer: 1000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to mark notifications as read. Please try again.'
+                        });
+                    }
+                });
+            });
+
+            $('#notificationList').on('click', '.notification-item', function (e) {
+                e.preventDefault();
+                const notificationId = $(this).data('id');
+
+                $.ajax({
+                    url: `{{ url('admin/notifications') }}/${notificationId}/mark-as-read`,
+                    method: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (response) {
+                        if (response.status) {
+                            loadLatestNotifications();
+                        }
+                    }
+                });
+            });
+
             $('.logout-btn').on('click', function (e) {
                 console.log('Logout button clicked');
                 e.preventDefault();
@@ -145,7 +198,7 @@
         });
         function loadLatestNotifications() {
             $.ajax({
-                url: "{{ route('user.get.notification') }}",
+                url: "{{ route('admin.notifications.data') }}",
                 method: 'GET',
                 success: function (response) {
                     let html = '';
@@ -155,21 +208,46 @@
 
                         notifications.forEach(notification => {
                             let data = notification.data;
+                            let actionText = '';
+                            let nameText = '';
+                            let iconClass = 'fas fa-bell';
+                            let performer = data.uploaded_by || data.performed_by || 'User';
+
+                            if (notification.type.includes('document_upload')) {
+                                actionText = 'uploaded file';
+                                nameText = data.document_name;
+                                iconClass = 'fas fa-file-upload text-success';
+                            } else if (notification.type.includes('document_delete')) {
+                                actionText = 'deleted file';
+                                nameText = data.document_name;
+                                iconClass = 'fas fa-trash-alt text-danger';
+                            } else if (notification.type.includes('folder_create')) {
+                                actionText = 'created folder';
+                                nameText = data.folder_name;
+                                iconClass = 'fas fa-folder-plus text-primary';
+                            } else if (notification.type.includes('folder_delete')) {
+                                actionText = 'deleted folder';
+                                nameText = data.folder_name;
+                                iconClass = 'fas fa-folder-minus text-danger';
+                            } else {
+                                actionText = 'performed action';
+                                nameText = data.document_name || data.folder_name || '';
+                            }
+
                             html += `
                                     <a href="#" class="list-group-item list-group-item-action border-0 border-bottom py-3 notification-item ${notification.read_at ? 'bg-white' : 'bg-primary bg-opacity-10'}" data-id="${notification.id}" style="transition: all 0.2s;">
                                         <div class="d-flex align-items-start">
 
                                             <div class="me-3 bg-white text-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
-                                                <i class="fas fa-file-alt fs-5"></i>
+                                                <i class="${iconClass} fs-5"></i>
                                             </div>
 
-                                            <!-- Content -->
                                             <div class="flex-grow-1 min-w-0">
                                                 <div class="fw-semibold text-dark text-truncate mb-1">
-                                                    ${data.uploaded_by ?? 'User'}
+                                                    ${performer}
                                                 </div>
                                                 <div class="small text-muted mb-2 text-wrap">
-                                                    uploaded <b class="text-dark">${data.document_name}</b>
+                                                    ${actionText} <b class="text-dark">${nameText}</b>
                                                 </div>
                                                 <div class="text-secondary d-flex align-items-center" style="font-size: 0.75rem;">
                                                     <i class="far fa-clock me-1"></i> ${timeAgo(notification.created_at)}

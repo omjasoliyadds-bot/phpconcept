@@ -76,5 +76,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('share', [DocumentController::class, 'sharedWithMe'])->name('user.get.share.documents');
         Route::get('notifications',[AdminUserController::class, 'getNotification'])->name('user.get.notification');
         Route::post('notifications/mark-as-read', [AdminUserController::class, 'markAsRead'])->name('user.notifications.mark_read');
+        Route::post('notifications/{id}/mark-as-read', [AdminUserController::class, 'markAsRead'])->name('user.notifications.mark_read.single');
     });
 });
