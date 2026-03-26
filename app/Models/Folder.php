@@ -5,9 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Document;
 class Folder extends Model
 {
     use SoftDeletes;
+    protected static function booted()
+    {
+        static::created(function ($folder) {
+            Cache::forget("user_dashboard_stats_{$folder->user_id}");
+        });
+
+        static::deleted(function ($folder) {
+            Cache::forget("user_dashboard_stats_{$folder->user_id}");
+        });
+    }
     protected $fillable = [
         'name',
         'user_id',

@@ -23,7 +23,7 @@ Route::post('reset', [ForgotPasswordController::class, 'reset'])->middleware('th
 Route::get('activate-account/{token}', [AuthController::class, 'activateAccount'])->name('activate.account');
 
 // Protected API Routes 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum','token.expiry'])->group(function () {
     // Admin Only API Routes
     Route::middleware(['admin'])->prefix('admin')->group(function () {
         Route::post('/logout', [AdminController::class, 'logout'])->name('api.admin.logout');
@@ -50,8 +50,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         })->name('api.user');
 
         Route::post('logout', [AuthController::class, 'logout'])->name('api.logout.user');
+        Route::post('token/refresh', [AuthController::class, 'refreshToken'])->name('api.token.refresh');
         Route::post('update', [UserController::class, 'updateProfile'])->name('api.user.profile.update');
-        Route::post('change-password', [UserController::class, 'changePassword'])->name('api.user.change-password');
+        Route::post('change-password', [UserController::class, 'changePassword'])->middleware('throttle:password')->name('api.user.change-password');
 
         // Folder API Routes
         Route::group(['prefix' => 'folders'], function () {

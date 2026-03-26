@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 use Laravel\Sanctum\HasApiTokens;
 use App\Enums\UserRole;
@@ -16,6 +17,24 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, HasApiTokens;
+
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            Cache::forget('admin_dashboard_stats');
+        });
+
+        static::deleted(function ($user) {
+            Cache::forget('admin_dashboard_stats');
+        });
+
+        static::updated(function ($user) {
+            // Check if role or status changed which affects the user count
+            if ($user->isDirty('role') || $user->isDirty('status')) {
+                Cache::forget('admin_dashboard_stats');
+            }
+        });
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -55,10 +74,20 @@ class User extends Authenticatable
     }
     public function getUsedStorageAttribute()
     {
-        if ($this->relationLoaded('documents')) {
-            return $this->documents->sum('size');
-        }
-        return $this->documents()->sum('size');
+        $cacheKey = "user_{$this->id}_used_storage";
+
+        return Cache::remember($cacheKey, 3600, function () {
+            if ($this->relationLoaded('documents')) {
+                return $this->documents->sum('size');
+            }
+            return $this->documents()->sum('size');
+        });
+    }
+
+    public function clearUsedStorageCache()
+    {
+        Cache::forget("user_{$this->id}_used_storage");
+        Cache::forget("admin_dashboard_stats");
     }
     public function getRemainingStorageAttribute()
     {
@@ -80,6 +109,21 @@ class User extends Authenticatable
         })
             ->where('role', '!=', UserRole::ADMIN->value)
             ->where('status', 1);
+    }
+
+    public static function getCachedActiveNonAdmin($userId = null)
+    {
+        $userId = $userId ?? auth()->id();
+        $cacheKey = "active_non_admin_users_{$userId}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($userId) {
+            return self::activeNonAdmin($userId)->get();
+        });
+    }
+
+    public function clearUserRelatedCache()
+    {
+        Cache::forget('admin_dashboard_stats');
     }
     /**
      * The attributes that should be hidden for serialization.

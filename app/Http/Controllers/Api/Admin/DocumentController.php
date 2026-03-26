@@ -10,6 +10,7 @@ use App\Models\DocumentUserPermission;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 
 class DocumentController extends Controller
 {
@@ -151,7 +152,7 @@ class DocumentController extends Controller
             }
             
             // Send notification email
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\DocumentSharedMail($document, auth()->user()));
+            Mail::to($user->email)->send(new \App\Mail\DocumentSharedMail($document, auth()->user()));
         }
 
         $sharedWith = User::whereIn('id', $request->user_ids)->pluck('name')->toArray();

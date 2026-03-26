@@ -6,10 +6,40 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\DocumentUserPermission;
+use Illuminate\Support\Facades\Cache;
 
 class Document extends Model
 {
     use HasFactory, SoftDeletes;
+    protected static function booted()
+    {
+        static::created(function ($document) {
+            if ($document->user) {
+                $document->user->clearUsedStorageCache();
+                Cache::forget("user_dashboard_stats_{$document->user_id}");
+            }
+        });
+
+        static::deleted(function ($document) {
+            if ($document->user) {
+                $document->user->clearUsedStorageCache();
+                Cache::forget("user_dashboard_stats_{$document->user_id}");
+            }
+        });
+
+        static::restored(function ($document) {
+            if ($document->user) {
+                $document->user->clearUsedStorageCache();
+                Cache::forget("user_dashboard_stats_{$document->user_id}");
+            }
+        });
+
+        static::updated(function ($document) {
+            if ($document->isDirty('size')) {
+                $document->user->clearUsedStorageCache();
+            }
+        });
+    }
 
     protected $fillable = [
         'user_id',

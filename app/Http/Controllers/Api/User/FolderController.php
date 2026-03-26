@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Folder;
 use App\Models\Document;
 use App\Models\User;
@@ -53,12 +53,12 @@ class FolderController extends Controller
             "user_id" => $userId,
             "parent_id" => $parentId
         ]);
-
+        Cache::forget("folders_data_$userId");
+        Cache::forget("explorer_data_$userId");
         auditLog('Create Folder', 'Folder', "Created folder \"{$request->name}\"", null, ['name' => $request->name], $folder->id);
 
         $admins = User::where('role', 'admin')->get();
         if ($admins->isNotEmpty()) {
-            /** @var \App\Models\User $currentUser */
             $currentUser = auth()->user();
             foreach ($admins as $admin) {
                 if ($admin->id !== $currentUser->id) {
@@ -77,12 +77,17 @@ class FolderController extends Controller
     public function getAllFolders(Request $request)
     {
         $user_id = auth()->id();
-        $folders = Folder::where('user_id', $user_id)->whereNull('parent_id')->with('subfolders')->get();
-        $outsideFiles = Document::where('user_id', $user_id)->whereNull('folder_id')->get();
+        $data =
+            Cache::remember("folders_data_$user_id", now()->addMinutes(15), function () use ($user_id) {
+                return [
+                    "folders" => Folder::where('user_id', $user_id)->whereNull('parent_id')->with('subfolders')->get(),
+                    "outsideFiles" => Document::where('user_id', $user_id)->whereNull('folder_id')->get()
+                ];
+            });
         return response()->json([
             "status" => true,
-            "folders" => $folders,
-            "outsideFiles" => $outsideFiles
+            "folders" => $data['folders'],
+            "outsideFiles" => $data['outsideFiles']
         ]);
     }
 
@@ -100,12 +105,13 @@ class FolderController extends Controller
         $folderName = $folder->name;
         $folderId = $folder->id;
         Folder::deleteRecursive($folder);
+        Cache::forget("folders_data_$userId");
+        Cache::forget("explorer_data_$userId");
 
         auditLog('Delete Folder', 'Folder', "Deleted folder \"{$folderName}\" and all its contents", null, null, $folderId);
 
         $admins = User::where('role', 'admin')->get();
         if ($admins->isNotEmpty()) {
-            /** @var \App\Models\User $currentUser */
             $currentUser = auth()->user();
             foreach ($admins as $admin) {
                 if ($admin->id !== $currentUser->id) {
@@ -158,6 +164,8 @@ class FolderController extends Controller
         $oldName = $folder->name;
         $folder->name = $request->name;
         $folder->save();
+        Cache::forget("folders_data_$userId");
+        Cache::forget("explorer_data_$userId");
 
         auditLog('Rename Folder', 'Folder', "Renamed folder \"{$oldName}\" to \"{$request->name}\"", ['name' => $oldName], ['name' => $request->name], $folder->id);
 
@@ -171,14 +179,19 @@ class FolderController extends Controller
     public function getExplorerData()
     {
         $user_id = auth()->id();
-        $folders = Folder::where('user_id', $user_id)->whereNull('parent_id')->get();
-        $files = Document::where('user_id', $user_id)->whereNull('folder_id')->get();
-        $allFolders = Folder::where('user_id', $user_id)->get();
+        $data = Cache::remember("explorer_data_$user_id", now()->addMinutes(15), function () use ($user_id) {
+            return [
+                "folders" => Folder::where('user_id', $user_id)->whereNull('parent_id')->get(),
+                "files" => Document::where('user_id', $user_id)->whereNull('folder_id')->get(),
+                "allFolders" => Folder::where('user_id', $user_id)->get()
+            ];
+        });
+
         return response()->json([
             "status" => true,
-            "folders" => $folders,
-            "files" => $files,
-            "allFolders" => $allFolders
+            "folders" => $data['folders'],
+            "files" => $data['files'],
+            "allFolders" => $data['allFolders']
         ]);
     }
 }

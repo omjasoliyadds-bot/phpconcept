@@ -19,7 +19,9 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             "name" => "required|string|max:255",
             "email" => "required|email|unique:users",
-            "password" => "required|min:8|confirmed",
+            "password" => "required|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/",
+        ], [
+            'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).'
         ]);
 
         if ($validator->fails()) {
@@ -33,8 +35,8 @@ class AuthController extends Controller
 
         $user = User::create([
             "name" => $request->name,
-            "email" => $request->email,  
-            "password" => $request->password,
+            "email" => $request->email,
+            "password" => Hash::make($request->password),
             "verification_token" => $token
         ]);
 
@@ -70,22 +72,17 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if (!$user->email_verified_at) {
+        if (!$user->email_verified_at || $user->status == 0) {
             return response()->json([
                 "status" => false,
-                "message" => "Please verify your email before login."
-            ]);
-        }
-
-        if ($user->status == 0) {
-            return response()->json([
-                "status" => false,
-                "message" => "Your account has been deactivated by the admin."
-            ]);
+                "message" => "Invalid Credentials",
+            ], 401);
         }
 
         Auth::login($user);
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $request->session()->regenerate();
+        $user->tokens()->delete();
+        $token = $user->createToken($request->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
         auditLog('Login', 'Auth', 'User logged in successfully', null, null, $user->id, $user->id);
 
         return response()->json([
@@ -104,9 +101,11 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = $request->user();
         if ($request->user()) {
             auditLog('Logout', 'Auth', 'User logged out', null, null, $request->user()->id, $request->user()->id);
-            $request->user()->tokens()->delete();
+            // Revoke all tokens for session integrity
+            $user->tokens()->delete();
         }
 
         Auth::guard('web')->logout();
@@ -119,6 +118,29 @@ class AuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function refreshToken(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->currentAccessToken()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No active token found. Please login again.'
+            ], 401);
+        }
+
+        $user->tokens()->delete();
+
+        $newToken = $user->createToken($request->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
+        auditLog('Token Refresh', 'Auth', 'User refreshed API token', null, null, $user->id, $user->id);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Token refreshed successfully',
+            'token' => $newToken
         ]);
     }
 

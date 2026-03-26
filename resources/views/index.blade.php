@@ -82,6 +82,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
+        $.validator.addMethod("strongPassword", function (value, element) {
+            return /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).+$/.test(value);
+        },"Password must contain at least one lowercase letter, one number, and one special character.");
             $('#userRegister').validate({
                 rules: {
                     name: {
@@ -93,7 +96,8 @@
                     },
                     password: {
                         required: true,
-                        minlength: 8
+                        minlength: 8,
+                        strongPassword: true
                     },
                     password_confirmation: {
                         required: true,

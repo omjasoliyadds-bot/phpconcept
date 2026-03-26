@@ -7,6 +7,8 @@ use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\EnsureAccountIsActivated;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\UserMiddleware;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use App\Http\Middleware\CheckTokenExpiry;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -22,10 +24,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'activated' => EnsureAccountIsActivated::class,
             'admin' => AdminMiddleware::class,
             'user' => UserMiddleware::class,
+            'token.expiry' => CheckTokenExpiry::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => auth()->user()->isAdmin() ? route('admin.dashboard') : route('user.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (TooManyRequestsHttpException $e, $request) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Too many attempts. Please try again later.'
+            ], 429);
+        });
     })->create();

@@ -95,6 +95,15 @@ class DocumentController extends Controller
             ], 422);
         }
 
+        // Additional safety: Check for common script headers in non-executable files
+        $content = file_get_contents($file->getPathname(), false, null, 0, 512);
+        if (preg_match('/^#!|^<\?php|eval\(|base64_decode\(/i', $content)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Potential script detected in file'
+            ], 403);
+        }
+
         $originalName = $file->getClientOriginalName();
 
         $duplicate = Document::where('user_id', $userId)
@@ -138,11 +147,12 @@ class DocumentController extends Controller
             'mime_type' => $realMime,
             'is_public' => false
         ]);
+        $currentUser = auth()->user();
         $admins = User::where('role', 'admin')->get();
         if ($admins->isNotEmpty()) {
             foreach ($admins as $admin) {
-                if ($admin->id !== $user->id) {
-                    $admin->notify(new DocumentNotification($document, $user));
+                if ($admin->id !== $currentUser->id) {
+                    $admin->notify(new DocumentNotification($document, $currentUser));
                 }
             }
         }
