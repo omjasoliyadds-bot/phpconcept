@@ -1,59 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+cd c:\wamp64\www\laravel\private-docs; cat > README.md <<'EOF'
+# Private-Docs (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Private-Docs is a secure document management system built with Laravel and Sanctum API authentication.
 
-## About Laravel
+## Key features
+- User registration with email verification
+- Login/logout + session regeneration
+- API token management (2h expiry, refresh endpoint, token revocation)
+- Rate limiting on login/register/password reset
+- Password reset with 15-minute token expiration
+- File upload policies: extension + MIME + magic-byte validation
+- Audit logging with immutability guard
+- Role-based admin/user controls
+- Document sharing and permission management
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements
+- PHP 8.2
+- Composer
+- MySQL (or compatible DB)
+- Node.js + npm (for frontend asset build)
+- Docker + Docker Compose (optional)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick local setup (non-Docker)
+1. Copy `.env.example` to `.env`:
+   - `cp .env.example .env`
+2. Install dependencies:
+   - `composer install`
+   - `npm install`
+3. Generate app key:
+   - `php artisan key:generate`
+4. Update `.env` database settings:
+   - `DB_CONNECTION=mysql`
+   - `DB_HOST=127.0.0.1`
+   - `DB_PORT=3306`
+   - `DB_DATABASE=private_docs`
+   - `DB_USERNAME=<youruser>`
+   - `DB_PASSWORD=<yourpassword>`
+5. Run migrations and seeders:
+   - `php artisan migrate`
+   - `php artisan db:seed` (if needed)
+6. Run backend:
+   - `php artisan serve`
+7. Run frontend (optional):
+   - `npm run dev`
+8. Open: `http://localhost:8000`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Docker setup
+The project supports Docker via Dockerfile and docker-compose.
 
-## Learning Laravel
+### Provided files
+- `dockerfile` (PHP-FPM container)
+- `docker-compose.yml` (app + nginx + mysql)
+- `nginx.conf` (NGINX web server config)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### .env for Docker
+- `DB_HOST=db`
+- `DB_DATABASE=private_docs`
+- `DB_USERNAME=appuser`
+- `DB_PASSWORD=apppassword`
+- `APP_URL=http://localhost:8080`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Start
+```bash
+docker-compose up --build -d
+```
+Then:
+```bash
+docker-compose exec app php artisan migrate
+```
+Browse: `http://localhost:8080`
 
-## Laravel Sponsors
+### Stop
+```bash
+docker-compose down
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## API endpoints
+- `POST /api/register`
+- `POST /api/login`
+- `POST /api/forgot-password`
+- `POST /api/reset`
+- `POST /api/token/refresh` (auth)
+- `POST /api/documents/upload` (auth)
 
-### Premium Partners
+## Security notes
+- Rate limits configured in `app/Providers/RouteServiceProvider.php`.
+- Password resets use Laravel broker, 15-min expiry in `config/auth.php`.
+- Audits in `app/Models/AuditLog.php` prevent updates/deletes and create content hash.
+- Upload check in `app/Http/Controllers/Api/User/DocumentController.php` validates extension/mime/content.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Switching to S3 storage
+1. Configure `config/filesystems.php` and `.env` with S3 credentials.
+2. Replace `Storage::disk('local')` calls with `Storage::disk('s3')` in repository methods.
 
-## Contributing
+## Troubleshooting
+- Permission error: set `chmod -R 775 storage bootstrap/cache` and owner to webserver user.
+- CORS/API: ensure `config/cors.php` is configured for your frontend domain.
+- Clear caches: `php artisan config:clear`, `php artisan cache:clear`, `php artisan route:clear`, `php artisan view:clear`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+EOF
