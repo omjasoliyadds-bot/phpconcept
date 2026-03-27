@@ -62,7 +62,7 @@
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
-                                    placeholder="Enter folder name" required>
+                                    placeholder="Enter folder name" maxlength="255" required>
                             </div>
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
-                                    placeholder="Enter new folder name" required>
+                                    placeholder="Enter new folder name" maxlength="255" required>
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                         <input type="hidden" name="id" id="doc_id">
                         <div class="mb-3">
                             <label class="form-label">Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="name" class="form-control" maxlength="255" required>
                         </div>
                     </div>
                     <div class="modal-footer border-0">
@@ -149,7 +149,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Select File</label>
-                            <input type="file" name="document" class="form-control" required>
+                            <input type="file" name="document" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Select Folder (Optional)</label>

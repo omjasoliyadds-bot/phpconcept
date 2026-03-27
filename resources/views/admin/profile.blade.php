@@ -87,11 +87,16 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            $.validator.addMethod("strongPassword", function (value, element) {
+                return /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).+$/.test(value);
+            },"Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).");
+
             // Update Profile AJAX
             $('#updateProfileForm').validate({
                 rules: {
                     name: {
-                        required: true
+                        required: true,
+                        maxlength: 255
                     },
                     email: {
                         required: true,
@@ -145,7 +150,8 @@
                     },
                     new_password: {
                         required: true,
-                        minlength: 8
+                        minlength: 8,
+                        strongPassword: true
                     },
                     new_password_confirmation: {
                         required: true,

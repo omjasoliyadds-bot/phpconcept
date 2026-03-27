@@ -140,6 +140,15 @@
                     return;
                 }
 
+                if (!permission || permission.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please select at least one permission.'
+                    });
+                    return;
+                }
+
                 $.ajax({
                     url: "{{ route('documents.share', ':id') }}".replace(':id', docId),
                     method: "POST",

@@ -14,6 +14,7 @@ use App\Mail\DocumentSharedMail;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use App\Notifications\DocumentNotification;
 use App\Notifications\DocumentDeleteNotification;
 
@@ -166,6 +167,10 @@ class DocumentController extends Controller
             $document->id
         );
 
+        Cache::forget("folders_data_{$userId}");
+        Cache::forget("explorer_data_{$userId}");
+        Cache::forget("user_dashboard_stats_{$userId}");
+
         return response()->json([
             'status' => true,
             'message' => 'File uploaded successfully',
@@ -217,6 +222,9 @@ class DocumentController extends Controller
 
         auditLog('Rename File', 'Document', "Renamed file \"{$oldName}\" to \"{$newName}\"", ['name' => $oldName], ['name' => $newName], $document->id);
 
+        Cache::forget("folders_data_{$document->user_id}");
+        Cache::forget("explorer_data_{$document->user_id}");
+
         return response()->json([
             'status' => true,
             'message' => 'File renamed successfully',
@@ -237,6 +245,10 @@ class DocumentController extends Controller
         $document->delete();
 
         auditLog('Delete File', 'Document', "Deleted file \"{$documentName}\"", null, null, $documentId);
+
+        Cache::forget("folders_data_{$document->user_id}");
+        Cache::forget("explorer_data_{$document->user_id}");
+        Cache::forget("user_dashboard_stats_{$document->user_id}");
 
         /** @var \App\Models\User $user */
         $user = auth()->user();

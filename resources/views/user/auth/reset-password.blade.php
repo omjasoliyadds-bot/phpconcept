@@ -79,13 +79,17 @@
     <script>
 
         $(document).ready(function () {
+            $.validator.addMethod("strongPassword", function (value, element) {
+                return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/.test(value);
+            },"Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&).");
 
             $('#resetPasswordForm').validate({
 
                 rules: {
                     password: {
                         required: true,
-                        minlength: 8
+                        minlength: 8,
+                        strongPassword: true
                     },
                     password_confirmation: {
                         required: true,

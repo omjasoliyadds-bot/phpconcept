@@ -28,7 +28,7 @@ class AuthController extends Controller
             return response()->json([
                 "status" => false,
                 "errors" => $validator->errors(),
-            ]);
+            ], 422);
         }
 
         $token = Str::random(64);
@@ -45,8 +45,7 @@ class AuthController extends Controller
 
         return response()->json([
             "status" => true,
-            "message" => "Registration successful. Please check your email to activate your account.",
-            "data" => $user
+            "message" => "Registration successful. Please verify email.",
         ]);
     }
 
@@ -61,7 +60,7 @@ class AuthController extends Controller
             return response()->json([
                 "status" => false,
                 "errors" => $validator->errors(),
-            ]);
+            ], 422);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -75,72 +74,208 @@ class AuthController extends Controller
         if (!$user->email_verified_at || $user->status == 0) {
             return response()->json([
                 "status" => false,
-                "message" => "Invalid Credentials",
+                "message" => "Account not verified or blocked",
             ], 401);
         }
 
+        if ($user->is_first_login) {
+
+            $otp = random_int(100000, 999999);
+            $otpToken = Str::uuid();
+
+            $user->update([
+                'otp' => Hash::make($otp),
+                'otp_token' => $otpToken,
+                'otp_expires_at' => now()->addMinutes(5),
+                'otp_attempts' => 0,
+                'otp_last_sent_at' => now()
+            ]);
+
+            session(['otp_token' => $otpToken]);
+
+            // Send OTP
+            Mail::raw("Your OTP is: $otp", function ($message) use ($user) {
+                $message->to($user->email)->subject('OTP Verification');
+            });
+
+            return response()->json([
+                "status" => true,
+                "message" => "OTP sent to your email",
+                "otp_token" => $otpToken
+            ]);
+        }
         Auth::login($user);
-        $request->session()->regenerate();
         $user->tokens()->delete();
+
         $token = $user->createToken($request->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
-        auditLog('Login', 'Auth', 'User logged in successfully', null, null, $user->id, $user->id);
 
         return response()->json([
             "status" => true,
             "message" => "Login successful",
             "token" => $token,
             "role" => $user->role,
-            "data" => [
-                "id" => $user->id,
-                "name" => $user->name,
-                "email" => $user->email,
-                "role" => $user->role
-            ]
+            "data" => $user
         ]);
     }
 
-    public function logout(Request $request)
+    public function verifyOtp(Request $request)
     {
-        $user = $request->user();
-        if ($request->user()) {
-            auditLog('Logout', 'Auth', 'User logged out', null, null, $request->user()->id, $request->user()->id);
-            // Revoke all tokens for session integrity
-            $user->tokens()->delete();
+        $request->merge([
+            'otp_token' => $request->input('otp_token') ?: $request->input('otpToken') ?: session('otp_token')
+        ]);
+
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits:6',
+            'otp_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => false,
+                "errors" => $validator->errors(),
+            ], 422);
         }
 
-        Auth::guard('web')->logout();
-
-        if ($request->hasSession()) {
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+        $user = User::where('otp_token', $request->otp_token)->first();
+        if (!$user) {
+            return response()->json([
+                "status" => false,
+                "message" => "Invalid token"
+            ], 404);
         }
+
+        if (now()->gt($user->otp_expires_at)) {
+            return response()->json([
+                "status" => false,
+                "message" => "OTP expired"
+            ], 401);
+        }
+
+        if ($user->otp_attempts >= 5) {
+            return response()->json([
+                "status" => false,
+                "message" => "Too many attempts"
+            ], 429);
+        }
+
+        // OTP match
+        if (!Hash::check($request->otp, $user->otp)) {
+            $user->increment('otp_attempts');
+
+            return response()->json([
+                "status" => false,
+                "message" => "Invalid OTP"
+            ], 401);
+        }
+
+        // SUCCESS
+        $user->update([
+            'otp' => null,
+            'otp_token' => null,
+            'otp_expires_at' => null,
+            'otp_attempts' => 0,
+            'is_first_login' => false
+        ]);
+
+        session()->forget('otp_token');
+        Auth::login($user);
+        $user->tokens()->delete();
+
+        $token = $user->createToken(request()->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
 
         return response()->json([
-            'status' => true,
-            'message' => 'Logged out successfully'
+            "status" => true,
+            "message" => "Login successful",
+            "token" => $token,
+            "role" => $user->role,
+            "data" => $user
+        ]);
+    }
+    public function resendOtp(Request $request)
+    {
+
+        $request->merge(['otp_token' => $request->input('otp_token') ?: $request->input('otpToken') ?: session('otp_token')]);
+
+        $validator = Validator::make($request->all(), [
+            'otp_token' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => false,
+                "errors" => $validator->errors(),
+            ], 422);
+        }
+
+        $user = User::where('otp_token', $request->otp_token)->first();
+
+        if (!$user) {
+            return response()->json([
+                "status" => false,
+                "message" => "Invalid token"
+            ], 404);
+        }
+
+        // Rate limit (60 sec)
+        if ($user->otp_last_sent_at && now()->diffInSeconds($user->otp_last_sent_at) < 60) {
+            return response()->json([
+                "status" => false,
+                "message" => "Wait before requesting OTP again"
+            ], 429);
+        }
+
+        $otp = random_int(100000, 999999);
+
+        $user->update([
+            'otp' => Hash::make($otp),
+            'otp_expires_at' => now()->addMinutes(5),
+            'otp_last_sent_at' => now()
+        ]);
+
+        Mail::raw("Your new OTP is: $otp", function ($message) use ($user) {
+            $message->to($user->email)->subject('Resend OTP');
+        });
+
+        return response()->json([
+            "status" => true,
+            "message" => "OTP resent successfully"
         ]);
     }
 
+    // ================= LOGOUT =================
+    public function logout(Request $request)
+    {
+        if ($request->user()) {
+            $request->user()->tokens()->delete();
+        }
+
+        Auth::logout();
+
+        return response()->json([
+            "status" => true,
+            "message" => "Logged out successfully"
+        ]);
+    }
+
+    // ================= REFRESH TOKEN =================
     public function refreshToken(Request $request)
     {
         $user = $request->user();
 
-        if (!$user || !$user->currentAccessToken()) {
+        if (!$user) {
             return response()->json([
-                'status' => false,
-                'message' => 'No active token found. Please login again.'
+                "status" => false,
+                "message" => "Unauthorized"
             ], 401);
         }
 
         $user->tokens()->delete();
 
-        $newToken = $user->createToken($request->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
-        auditLog('Token Refresh', 'Auth', 'User refreshed API token', null, null, $user->id, $user->id);
+        $token = $user->createToken($request->userAgent(), ['*'], now()->addHours(2))->plainTextToken;
 
         return response()->json([
-            'status' => true,
-            'message' => 'Token refreshed successfully',
-            'token' => $newToken
+            "status" => true,
+            "token" => $token
         ]);
     }
 
@@ -151,24 +286,25 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 "status" => false,
-                "message" => "Invalid or expired activation link"
+                "message" => "Invalid link"
             ]);
         }
 
         if ($user->email_verified_at) {
             return response()->json([
                 "status" => true,
-                "message" => "Account already verified"
+                "message" => "Already verified"
             ]);
         }
 
-        $user->email_verified_at = now();
-        $user->verification_token = null;
-        $user->save();
+        $user->update([
+            'email_verified_at' => now(),
+            'verification_token' => null
+        ]);
 
         return response()->json([
             "status" => true,
-            "message" => "Account Activated Successfully"
+            "message" => "Account activated"
         ]);
     }
 }

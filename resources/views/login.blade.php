@@ -115,12 +115,7 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 }).then(() => {
-                                    $('#userLogin')[0].reset();
-                                    if (response.role == 'admin') {
-                                        window.location.href = "{{ route('admin.dashboard') }}";
-                                    } else {
-                                        window.location.href = "{{ route('user.dashboard') }}";
-                                    }
+                                     window.location.href = "/verify-otp";
                                 });
                             } else {
                                 // Specific handling for unverified email

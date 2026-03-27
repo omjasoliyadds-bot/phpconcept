@@ -21,7 +21,8 @@ Route::post('login', [AuthController::class, 'login'])->middleware('throttle:log
 Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:password')->name('password.email');
 Route::post('reset', [ForgotPasswordController::class, 'reset'])->middleware('throttle:password')->name('api.password.reset');
 Route::get('activate-account/{token}', [AuthController::class, 'activateAccount'])->name('activate.account');
-
+Route::post('verify-otp', [AuthController::class, 'verifyOtp'])->middleware('throttle:otp-attempts')->name('verify.otp');
+Route::post('resend-otp', [AuthController::class, 'resendOtp'])->middleware('throttle:otp-attempts')->name('resend.otp');
 // Protected API Routes 
 Route::middleware(['auth:sanctum','token.expiry'])->group(function () {
     // Admin Only API Routes

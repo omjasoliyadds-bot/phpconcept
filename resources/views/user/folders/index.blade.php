@@ -28,7 +28,7 @@
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
-                                    placeholder="Enter folder name" required>
+                                    placeholder="Enter folder name" maxlength="255" required>
                             </div>
                         </div>
                     </div>
@@ -62,7 +62,7 @@
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
-                                    placeholder="Enter new folder name" required>
+                                    placeholder="Enter new folder name" maxlength="255" required>
                             </div>
                         </div>
                     </div>

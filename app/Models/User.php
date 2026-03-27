@@ -36,11 +36,6 @@ class User extends Authenticatable
         });
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -49,7 +44,13 @@ class User extends Authenticatable
         'role',
         'status',
         'can_share',
-        'storage_limit'
+        'storage_limit',
+        'otp',
+        'otp_token',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_last_sent_at',
+        'is_first_login',
     ];
 
     public function isAdmin()

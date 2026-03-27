@@ -89,7 +89,7 @@
                                 <i class="fa fa-folder text-muted"></i>
                             </span>
                             <input type="text" name="name" class="form-control border-start-0"
-                                placeholder="Enter folder name" required>
+                                placeholder="Enter folder name" maxlength="255" required>
                         </div>
                     </div>
                 </div>
@@ -115,8 +115,7 @@
                 <input type="hidden" name="folder_id" value="{{ $folder->id }}">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Select File</label>
-                        <input type="file" name="document" class="form-control" required>
+                        <input type="file" name="document" class="form-control" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" required>
                     </div>
                     <p class="text-muted small">File will be uploaded to: <strong>{{ $folder->name }}</strong></p>
                 </div>
@@ -151,7 +150,7 @@
                                 <i class="fa fa-folder text-muted"></i>
                             </span>
                             <input type="text" name="name" class="form-control border-start-0"
-                                value="{{ $folder->name }}" required>
+                                value="{{ $folder->name }}" maxlength="255" required>
                         </div>
                     </div>
                 </div>
@@ -190,7 +189,7 @@
                                 <i class="fa fa-file text-muted"></i>
                             </span>
                             <input type="text" name="name" class="form-control border-start-0"
-                                placeholder="Enter new name" required>
+                                placeholder="Enter new name" maxlength="255" required>
                         </div>
                     </div>
                 </div>

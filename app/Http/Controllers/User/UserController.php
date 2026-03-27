@@ -66,4 +66,7 @@ class UserController extends Controller
         $users = User::getCachedActiveNonAdmin();
         return view('user.explorer.manage-access', compact('document', 'users'));
     }
+    public function viewOtpPage(){
+        return view('otp');
+    }
 }

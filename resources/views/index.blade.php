@@ -89,6 +89,7 @@
                 rules: {
                     name: {
                         required: true,
+                        maxlength: 255
                     },
                     email: {
                         required: true,

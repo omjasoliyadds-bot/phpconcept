@@ -52,5 +52,15 @@ class RouteServiceProvider extends ServiceProvider
                     ], 429);
                 });
         });
+
+        RateLimiter::for('otp-attempts', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip())
+                ->response(function () {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many OTP attempts. Please try again later.'
+                    ], 429);
+                });
+        });
     }
 }
