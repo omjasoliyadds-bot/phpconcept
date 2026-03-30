@@ -67,6 +67,7 @@ class UserController extends Controller
         return view('user.explorer.manage-access', compact('document', 'users'));
     }
     public function viewOtpPage(){
-        return view('otp');
+        $otpToken = session('otp_token');
+        return view('otp', compact('otpToken'));
     }
 }

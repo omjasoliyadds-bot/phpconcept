@@ -40,6 +40,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'email_verified_at',
         'verification_token',
         'role',
         'status',
@@ -96,7 +97,7 @@ class User extends Authenticatable
     }
     public function sharedDocuments()
     {
-        return $this->belongsToMany(Document::class , 'document_user_permissions')
+        return $this->belongsToMany(Document::class, 'document_user_permissions')
             ->withPivot('permission')
             ->withTimestamps();
     }

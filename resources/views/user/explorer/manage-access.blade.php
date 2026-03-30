@@ -66,14 +66,17 @@
 
                 <div class="card card-sharing border-0 p-4">
                     <h5 class="fw-bold mb-3">File Summary</h5>
-                    <div class="d-flex align-items-center p-3 text-white rounded-3" style="background: rgba(255, 255, 255, 0.05);">
+                    <div class="d-flex align-items-center p-3 text-white rounded-3"
+                        style="background: rgba(255, 255, 255, 0.05);">
                         <div class="me-3 fs-3 text-info">
                             <i class="fa {{ $document->icon }}"></i>
                         </div>
                         <div>
-                            <div class="fw-bold text-truncate text-dark" style="max-width: 250px;">{{ $document->name }}</div>
+                            <div class="fw-bold text-truncate text-dark" style="max-width: 250px;">{{ $document->name }}
+                            </div>
                             <div class="small text-muted">{{ formatBytes($document->size) }} • Created
-                                {{ $document->created_at->format('M d, Y') }}</div>
+                                {{ $document->created_at->format('M d, Y') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -158,20 +161,20 @@
                         permission: permission
                     },
                     success: function (response) {
-                         if (response.status) {
-                             window.showSuccess(response.message);
-                             loadSharedUsers(docId);
-                             $('#share_users').val(null).trigger('change');
-                         } else {
-                             window.showErrors(response);
-                         }
+                        if (response.status) {
+                            window.showSuccess(response.message);
+                            loadSharedUsers(docId);
+                            $('#share_users').val(null).trigger('change');
+                        } else {
+                            window.showErrors(response);
+                        }
                     },
                     error: function (xhr) {
                         let res = xhr.responseJSON;
 
                         if (res && res.message) {
                             Swal.fire({
-                                toast:true,
+                                toast: true,
                                 position: 'top-end',
                                 icon: 'error',
                                 title: 'Access Denied',
@@ -186,7 +189,7 @@
                                 title: 'Error',
                                 text: 'Something went wrong.'
                             });
-                         }
+                        }
                     }
                 });
             });
@@ -201,36 +204,36 @@
                             currentSharedUsers = response.data;
                             response.data.forEach(function (item) {
                                 html += `
-                                        <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded-3 border-secondary shadow-sm transition-hover" style="background: rgba(255, 255, 255, 0.03); border: 1px solid #334155;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-circle bg-primary text-white me-3">
-                                                    ${item.user.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">${item.user.name}</div>
-                                                    <div class="small text-muted">${item.user.email}</div>
-                                                    <div class="mt-2">
-                                                        ${item.permissions.map(p => {
+                                            <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded-3 border-secondary shadow-sm transition-hover" style="background: rgba(255, 255, 255, 0.03); border: 1px solid #334155;">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-circle bg-primary text-white me-3">
+                                                        ${item.user.name.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">${item.user.name}</div>
+                                                        <div class="small text-muted">${item.user.email}</div>
+                                                        <div class="mt-2">
+                                                            ${item.permissions.map(p => {
                                     let badgeClass = p === 'edit' ? 'bg-warning' : (p === 'download' ? 'bg-success' : 'bg-info');
                                     return `<span class="badge ${badgeClass} text-white me-1 text-capitalize">${p}</span>`;
                                 }).join('')}
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <button class="btn btn-outline-danger btn-sm px-3 rounded-pill revokeBtn" data-user-id="${item.user.id}">
+                                                    <i class="fa fa-user-minus me-1"></i> Revoke
+                                                </button>
                                             </div>
-                                            <button class="btn btn-outline-danger btn-sm px-3 rounded-pill revokeBtn" data-user-id="${item.user.id}">
-                                                <i class="fa fa-user-minus me-1"></i> Revoke
-                                            </button>
-                                        </div>
-                                    `;
+                                        `;
                             });
                         } else {
                             currentSharedUsers = [];
                             html = `
-                                    <div class="text-center py-5">
-                                        <i class="fa fa-user-shield text-muted fs-1 mb-3 opacity-25"></i>
-                                        <p class="text-muted">This file is not shared with anyone yet.</p>
-                                    </div>
-                                `;
+                                        <div class="text-center py-5">
+                                            <i class="fa fa-user-shield text-muted fs-1 mb-3 opacity-25"></i>
+                                            <p class="text-muted">This file is not shared with anyone yet.</p>
+                                        </div>
+                                    `;
                         }
                         $('#sharedUsersList').html(html);
                     }
@@ -257,10 +260,10 @@
                                 user_id: userId
                             },
                             success: function (response) {
-                                 if (response.status) {
-                                     window.showSuccess(response.message);
-                                     loadSharedUsers(docId);
-                                 }
+                                if (response.status) {
+                                    window.showSuccess(response.message);
+                                    loadSharedUsers(docId);
+                                }
                             }
                         });
                     }

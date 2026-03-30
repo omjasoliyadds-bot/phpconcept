@@ -44,8 +44,11 @@
                 <p class="text-muted small">Enter the 6-digit OTP sent to your email</p>
                 <form id="otpForm">
                     @csrf
-                    <input type="text" name="otp" id="otp" maxlength="6" class="form-control otp-input mt-3"
-                        placeholder="------">
+                    <input type="hidden" name="otp_token" id="otp_token" value="{{ $otpToken }}">
+                    <input type="text" name="otp" id="otp" maxlength="6" 
+                        class="form-control otp-input mt-3" placeholder="Enter 6-digit OTP"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                        autocomplete="one-time-code" inputmode="numeric">
 
                     <button type="submit" class="btn btn-primary w-100 mt-3">
                         Verify OTP
@@ -92,12 +95,14 @@
 
         function verifyOtp() {
             let otp = $('#otp').val();
+            let otp_token = $('#otp_token').val();
 
             $.ajax({
                 url: "{{ route('verify.otp') }}",
                 type: "POST",
                 data: {
                     otp: otp,
+                    otp_token: otp_token,
                     _token: "{{ csrf_token() }}"
                 },
                 success: function (response) {
@@ -125,10 +130,12 @@
         }
 
         function resendOtp() {
+            let otp_token = $('#otp_token').val();
             $.ajax({
                 url: "{{ route('resend.otp') }}",
                 type: "POST",
                 data: {
+                    otp_token: otp_token,
                     _token: "{{ csrf_token() }}" 
                 },
                 success: function (response) {

@@ -21,36 +21,37 @@ class DocumentController extends Controller
             return DataTables::of($documents)
                 ->addIndexColumn()
                 ->addColumn('permissions', function ($document) {
-                if ($document->permissionUsers->isEmpty()) {
-                    return '<span class="text-muted">No Access</span>';
-                }
-                $grouped = $document->permissionUsers->groupBy('user_id');
-                $html = '';
-                foreach ($grouped as $perms) {
-                    $user = $perms->first()->user;
-                    $userName = e($user->name);
-                    $permissions = $perms->pluck('permission')->map(function ($perm) {
+                    if ($document->permissionUsers->isEmpty()) {
+                        return '<span class="text-muted">No Access</span>';
+                    }
+                    $grouped = $document->permissionUsers->groupBy('user_id');
+                    $html = '';
+                    foreach ($grouped as $perms) {
+                        $user = $perms->first()->user;
+                        $userName = e($user->name);
+                        $permissions = $perms->pluck('permission')->map(
+                            function ($perm) {
                                 return "<span class='badge bg-info text-dark me-1'>{$perm}</span>";
                             }
-                            )->implode(' ');
-                            $html .= "
+                        )->implode(' ');
+                        $html .= "
                             <div class='mb-1'>
                                 <strong>{$userName}</strong><br>
                                 {$permissions}
                             </div>
                         ";
-                        }
+                    }
 
-                        return $html;
-                    })
+                    return $html;
+                })
                 ->addColumn('action', function ($document) {
-                $manageUrl = route('admin.documents.manage-access', $document->id);
-                return '
+                    $manageUrl = route('admin.documents.manage-access', $document->id);
+                    return '
                     <a href="' . $manageUrl . '" class="btn btn-sm btn-outline-primary" title="Manage Access"><i class="fa fa-users-cog me-1"></i></a>
                     <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger revoke-permissions" data-id="' . $document->id . '" title="Revoke All Access"><i class="fa fa-user-minus me-1"></i></a>
                     <a href="javascript:void(0)" class="btn btn-sm btn-outline-danger delete-document" data-id="' . $document->id . '" title="Force Delete"><i class="fa fa-trash me-1"></i></a>
                     ';
-            })
+                })
                 ->rawColumns(['permissions', 'action'])
                 ->make(true);
         }
@@ -137,12 +138,10 @@ class DocumentController extends Controller
                 if ($existingPerm) {
                     if ($existingPerm->trashed()) {
                         $existingPerm->restore();
-                    }
-                    else {
+                    } else {
                         $alreadyShared[] = $userId;
                     }
-                }
-                else {
+                } else {
                     DocumentUserPermission::create([
                         'document_id' => $id,
                         'user_id' => $userId,
@@ -150,7 +149,7 @@ class DocumentController extends Controller
                     ]);
                 }
             }
-            
+
             // Send notification email
             Mail::to($user->email)->send(new \App\Mail\DocumentSharedMail($document, auth()->user()));
         }
@@ -165,8 +164,8 @@ class DocumentController extends Controller
         return response()->json([
             'status' => true,
             'message' => !empty($alreadyShared)
-            ? 'Permissions updated successfully'
-            : 'Access granted successfully',
+                ? 'Permissions updated successfully'
+                : 'Access granted successfully',
         ]);
     }
 

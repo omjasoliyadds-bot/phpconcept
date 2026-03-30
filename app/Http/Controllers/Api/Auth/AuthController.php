@@ -37,7 +37,8 @@ class AuthController extends Controller
             "name" => $request->name,
             "email" => $request->email,
             "password" => Hash::make($request->password),
-            "verification_token" => $token
+            "verification_token" => $token,
+            "status" => 0 // New users are inactive until verified
         ]);
 
         $link = route('activate.account', $token);
@@ -289,27 +290,16 @@ class AuthController extends Controller
         $user = User::where('verification_token', $token)->first();
 
         if (!$user) {
-            return response()->json([
-                "status" => false,
-                "message" => "Invalid link"
-            ]);
+            return redirect()->route('login')->with('error', 'Token is invalid or has already been used.');
         }
 
-        if ($user->email_verified_at) {
-            return response()->json([
-                "status" => true,
-                "message" => "Already verified"
-            ]);
-        }
-
+        // If token is valid, we always ensure activation happens
         $user->update([
-            'email_verified_at' => now(),
-            'verification_token' => null
+            'email_verified_at' => $user->email_verified_at ?: now(),
+            'verification_token' => null,
+            'status' => 1 // Activate the account
         ]);
 
-        return response()->json([
-            "status" => true,
-            "message" => "Account activated"
-        ]);
+        return redirect()->route('login')->with('success', 'Your account has been activated successfully! You can now login.');
     }
 }
