@@ -24,7 +24,7 @@
                         <div class="mb-3">
                             <label class="form-label fw-medium">Folder Name</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-dark border-end-0 text-muted">
+                                <span class="input-group-text border-end-0 text-muted">
                                     <i class="fa fa-folder text-muted"></i>
                                 </span>
                                 <input type="text" name="name" class="form-control border-start-0"
@@ -245,7 +245,7 @@
 
             function renderFolderRow(folder, allFolders, depth) {
                 let date = new Date(folder.created_at).toLocaleDateString();
-                let size = (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB';
+                let size = window.formatBytes(folder.total_size || 0);
                 let subCount = folder.subfolder_count || 0;
                 let padding = depth * 25;
 

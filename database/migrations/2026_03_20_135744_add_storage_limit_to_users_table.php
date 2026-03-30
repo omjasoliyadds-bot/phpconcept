@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->bigInteger('storage_limit')->default(1073741824)->after('can_share');
+            $table->bigInteger('storage_limit')->default(104857600)->after('can_share');
         });
     }
 

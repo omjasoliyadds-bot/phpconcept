@@ -75,7 +75,7 @@
                         <div>
                             <div class="fw-bold text-truncate" style="max-width: 250px;">{{ $document->name }}</div>
                             <div class="small text-muted">Owned by: <strong>{{ $document->user->name }}</strong></div>
-                            <div class="small text-muted">{{ number_format($document->size / 1024 / 1024, 2) }} MB • Created
+                            <div class="small text-muted">{{ formatBytes($document->size) }} • Created
                                 {{ $document->created_at->format('M d, Y') }}</div>
                         </div>
                     </div>

@@ -89,7 +89,7 @@
                                                 </div>
                                                 <p class="mb-1"><strong>Owner name:</strong> ${doc.user.name}</p>
                                                 <p class="mb-1"><strong>Owner email:</strong> ${doc.user.email}</p>
-                                                <p class="mb-1"><strong>Size:</strong> ${formatFileSize(doc.size)}</p>
+                                                <p class="mb-1"><strong>Size:</strong> ${window.formatBytes(doc.size)}</p>
                                                 <p class="mb-1"><strong>Date:</strong> ${formatDate(doc.created_at)}</p>
                                                 <div>
                                                 ${permissions.includes('view') ? `<button class="btn btn-sm btn-primary">View</button>` : ''}
@@ -126,11 +126,7 @@
         }
 
         // helpers
-        function formatFileSize(bytes) {
-            // return (bytes < 1024) return bytes + ' B'; for kb
-            // return (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB' for bytes;
-            return (bytes / 1048576).toFixed(2) + ' MB';
-        }
+
 
         function formatDate(date) {
             let d = new Date(date);

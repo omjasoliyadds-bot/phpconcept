@@ -185,13 +185,14 @@
             $(document).on('click', '.edit-storage', function () {
                 let id = $(this).data('id');
                 let currentLimit = $(this).data('limit');
-                let currentLimitGB = (currentLimit / (1024 * 1024 * 1024)).toFixed(2);
+                let currentLimitMB = (currentLimit / (1024 * 1024)).toFixed(2);
+                let currentFriendlyLimit = window.formatBytes(currentLimit);
 
                 Swal.fire({
                     title: 'Update Storage Limit',
-                    text: 'Enter the new storage limit in GB:',
+                    html: `Current limit: <strong>${currentFriendlyLimit}</strong><br><br>Enter the new storage limit in MB:`,
                     input: 'number',
-                    inputValue: currentLimitGB,
+                    inputValue: currentLimitMB,
                     showCancelButton: true,
                     confirmButtonText: 'Update',
                     confirmButtonColor: '#0d6efd',
@@ -202,8 +203,8 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        let newLimitGB = result.value;
-                        let newLimitBytes = Math.round(newLimitGB * 1024 * 1024 * 1024);
+                        let newLimitMB = result.value;
+                        let newLimitBytes = Math.round(newLimitMB * 1024 * 1024);
 
                         $.ajax({
                             url: "{{ route('admin.users.update_storage_limit') }}",

@@ -211,7 +211,7 @@
                         let date = new Date(folder.created_at).toLocaleDateString('en-US', {
                             month: 'short', day: '2-digit', year: 'numeric'
                         });
-                        let totalSize = folder.total_size ? (folder.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
+                        let totalSize = window.formatBytes(folder.total_size || 0);
                         html += `
                                 <tr>
                                     <td onclick="window.location.href='/folders/${folder.id}/files'" style="cursor:pointer;">
@@ -246,7 +246,7 @@
                         let date = new Date(file.created_at).toLocaleDateString('en-US', {
                             month: 'short', day: '2-digit', year: 'numeric'
                         });
-                        let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                        let size = window.formatBytes(file.size || 0);
                         let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', file.id);
                         html += `
                                 <tr>

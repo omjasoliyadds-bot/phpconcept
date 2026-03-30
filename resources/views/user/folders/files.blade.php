@@ -227,7 +227,7 @@
                             if (response.subfolders && response.subfolders.length > 0) {
                                 response.subfolders.forEach(sub => {
                                     let date = new Date(sub.created_at).toLocaleDateString();
-                                    let totalSize = sub.total_size ? (sub.total_size / (1024 * 1024)).toFixed(2) + ' MB' : '0.00 MB';
+                                    let totalSize = window.formatBytes(sub.total_size || 0);
                                     html += `
                                                 <tr>
                                                     <td class="ps-4" onclick="window.location.href='/folders/${sub.id}/files'" style="cursor:pointer;">
@@ -256,7 +256,7 @@
                             if (response.files.length > 0) {
                                 response.files.forEach(file => {
                                     let date = new Date(file.created_at).toLocaleDateString();
-                                    let size = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+                                    let size = window.formatBytes(file.size || 0);
                                     let downloadUrl = "{{ route('documents.download', ':id', false) }}".replace(':id', file.id);
                                     html += `
                                                     <tr>
@@ -299,7 +299,7 @@
                             }
 
                             if (response.totalSize !== undefined) {
-                                let size = (response.totalSize / 1024 / 1024).toFixed(2) + ' MB';
+                                let size = window.formatBytes(response.totalSize || 0);
                                 $('#currentFolderSize').text(`(${size})`);
                             }
                             $('#filesList').html(html);
