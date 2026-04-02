@@ -15,6 +15,7 @@
             background-color: #f8f9fa;
             font-family: 'Inter', sans-serif;
         }
+
         .auth-card {
             max-width: 400px;
             width: 100%;
@@ -72,7 +73,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button class="btn btn-primary" type="submit">Login</button>
+                        <button class="btn btn-primary" type="submit" id="login">Login</button>
                     </div>
                 </form>
             </div>
@@ -118,6 +119,8 @@
                     error.insertAfter(element);
                 },
                 submitHandler: function (form) {
+                    let btn = $("#login");
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Logging in...');
                     let formData = new FormData(form);
                     $.ajax({
                         url: "{{ route('api.login.user') }}",
@@ -136,9 +139,10 @@
                                     showConfirmButton: false,
                                     timer: 1500
                                 }).then(() => {
-                                     window.location.href = "/verify-otp";
+                                    window.location.href = "/verify-otp";
                                 });
                             } else {
+                                btn.prop('disabled', false).html('Login');
                                 // Specific handling for unverified email
                                 let icon = 'error';
                                 if (response.message.toLowerCase().includes('verify')) {
@@ -163,6 +167,9 @@
                                 title: 'Login Failed',
                                 text: errorMsg,
                             });
+                        },
+                        complete: function () {
+                            btn.prop('disabled', false).html('Login');
                         }
                     })
                 }

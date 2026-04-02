@@ -38,7 +38,6 @@ class AuthController extends Controller
             "email" => $request->email,
             "password" => Hash::make($request->password),
             "verification_token" => $token,
-            "status" => 0 // New users are inactive until verified
         ]);
 
         $link = route('activate.account', $token);

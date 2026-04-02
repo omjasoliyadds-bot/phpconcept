@@ -15,6 +15,7 @@
             background-color: #f8f9fa;
             font-family: 'Inter', sans-serif;
         }
+
         .auth-card {
             max-width: 500px;
             width: 100%;
@@ -61,7 +62,7 @@
                     </div>
 
                     <div class="d-grid mt-2">
-                        <button class="btn btn-primary" type="submit">Register</button>
+                        <button class="btn btn-primary" type="submit" id="register">Register</button>
                     </div>
                 </form>
             </div>
@@ -82,9 +83,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
-        $.validator.addMethod("strongPassword", function (value, element) {
-            return /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).+$/.test(value);
-        },"Password must contain at least one lowercase letter, one number, and one special character.");
+            $.validator.addMethod("strongPassword", function (value, element) {
+                return /^(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).+$/.test(value);
+            }, "Password must contain at least one lowercase letter, one number, and one special character.");
             $('#userRegister').validate({
                 rules: {
                     name: {
@@ -128,6 +129,8 @@
                     error.insertAfter(element);
                 },
                 submitHandler: function (form) {
+                    let btn = $('#register');
+                    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i> Registering...');
                     let formData = new FormData(form);
                     $.ajax({
                         url: "{{ route('api.user.store') }}",
@@ -149,6 +152,7 @@
                                     window.location.href = "{{ route('login') }}";
                                 })
                             } else {
+                                btn.prop('disabled', false).html('Register');
                                 if (response.errors) {
                                     let errorMessages = '';
                                     Object.values(response.errors).forEach(err => {
@@ -170,6 +174,9 @@
                         },
                         error: function (xhr, status, error) {
                             console.log(error);
+                        },
+                        complete: function () {
+                            btn.prop('disabled', false).html('Register');
                         }
                     });
                 }
